@@ -8,10 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* =========================================================
-   1) CONFIG (edit the JS block near the bottom of this file)
-   2) DESIGN TOKENS
-   ========================================================= */
 :root {
   --color-bg: #0F1626;
   --color-bg-soft: #121A2E;
@@ -33,10 +29,7 @@
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: 90px; }
-body {
-  margin: 0; background: var(--color-bg); color: var(--color-text);
-  font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased;
-}
+body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0; }
 a { color: inherit; }
 img { max-width: 100%; display: block; }
@@ -45,17 +38,13 @@ button { font-family: inherit; cursor: pointer; }
 .container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
 
 /* Header */
-.site-header {
-  position: sticky; top: 0; z-index: 30;
-  background: rgba(15, 22, 38, 0.88); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--color-border);
-}
-.site-header .container { display: flex; align-items: center; justify-content: space-between; min-height: 72px; }
-.brand { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.site-header { position: sticky; top: 0; z-index: 30; background: rgba(15, 22, 38, 0.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--color-border); }
+.site-header .container { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 16px; }
+.brand { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; flex: none; }
 .brand .gem { width: 20px; height: 20px; flex: none; }
 .auth-area { display: flex; align-items: center; gap: 12px; }
 
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-pill); border: 1px solid transparent; font-size: 15px; font-weight: 600; transition: transform .15s, background .15s, border-color .15s; text-decoration: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-pill); border: 1px solid transparent; font-size: 15px; font-weight: 600; transition: transform .15s, background .15s, border-color .15s; text-decoration: none; white-space: nowrap; }
 .btn:active { transform: scale(0.97); }
 .btn-primary { background: var(--color-accent); color: #0A1420; }
 .btn-primary:hover { background: var(--color-accent-strong); }
@@ -68,24 +57,33 @@ button { font-family: inherit; cursor: pointer; }
 .btn-success { background: var(--color-success); color: #06210f; }
 .btn-sm { padding: 7px 14px; font-size: 13px; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-block { width: 100%; }
+
+.wallet-chip { display: flex; align-items: center; gap: 8px; background: var(--color-surface); border: 1px solid var(--color-border); padding: 8px 16px; border-radius: var(--radius-pill); font-size: 14px; }
+.wallet-chip .amt { color: var(--color-gold); font-weight: 700; }
 
 .user-chip { display: flex; align-items: center; gap: 10px; position: relative; }
 .user-chip img { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--color-border); }
 .user-chip .name { font-size: 14px; color: var(--color-text-muted); }
-.menu { position: absolute; top: 46px; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; min-width: 170px; display: none; flex-direction: column; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.menu { position: absolute; top: 46px; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; min-width: 180px; display: none; flex-direction: column; box-shadow: 0 12px 30px rgba(0,0,0,.35); z-index: 40; }
 .menu.open { display: flex; }
 .menu a, .menu button { background: none; border: none; color: var(--color-text); text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
 .menu a:hover, .menu button:hover { background: var(--color-surface-alt); }
 
 /* Hero */
-.hero { padding: 72px 0 56px; }
+.hero { padding: 56px 0 48px; }
 .hero-inner { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
 .hero-eyebrow { color: var(--color-accent); font-weight: 600; font-size: 15px; margin-bottom: 14px; }
-.hero h1 { font-size: 44px; line-height: 1.25; max-width: 15ch; }
+.hero h1 { font-size: 40px; line-height: 1.25; max-width: 15ch; }
 .hero p { color: var(--color-text-muted); font-size: 17px; max-width: 46ch; margin: 20px 0 28px; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 .hero-art { display: flex; justify-content: center; }
-.hero-art svg { width: 100%; max-width: 320px; }
+.hero-art svg { width: 100%; max-width: 300px; }
+
+/* Wallet card (shown after login) */
+.wallet-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 22px 26px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+.wallet-card .label { color: var(--color-text-muted); font-size: 14px; margin-bottom: 4px; }
+.wallet-card .balance { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--color-gold); }
 
 /* Sections */
 .section-heading { margin-bottom: 28px; }
@@ -102,10 +100,10 @@ button { font-family: inherit; cursor: pointer; }
 .package-price { margin-top: 14px; font-size: 22px; font-weight: 700; color: var(--color-gold); }
 .package-card .btn { margin-top: 16px; }
 
-/* Orders */
-.orders-section { padding: 20px 0 72px; }
-.order-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; font-size: 14px; }
-.order-row .order-date { color: var(--color-text-muted); }
+/* Lists (orders / deposits) */
+.list-section { padding: 20px 0 64px; }
+.list-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; font-size: 14px; }
+.list-row .row-date { color: var(--color-text-muted); }
 .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 600; width: fit-content; }
 .status-pending { background: rgba(244,183,64,.15); color: var(--color-gold); }
 .status-confirmed { background: rgba(76,175,125,.15); color: var(--color-success); }
@@ -130,12 +128,14 @@ button { font-family: inherit; cursor: pointer; }
 .form-msg { font-size: 13px; margin-top: 10px; }
 .form-msg.error { color: var(--color-danger); }
 .form-msg.success { color: var(--color-success); }
+.balance-note { font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; padding: 10px 14px; background: var(--color-bg-soft); border-radius: var(--radius-input); }
+.balance-note.low { color: var(--color-danger); }
 
 /* Footer */
 .site-footer { border-top: 1px solid var(--color-border); padding: 28px 0; color: var(--color-text-muted); font-size: 13px; text-align: center; }
 
 /* Admin */
-.admin-tabs { display: flex; gap: 8px; padding: 24px 0 0; }
+.admin-tabs { display: flex; gap: 8px; padding: 24px 0 0; flex-wrap: wrap; }
 .admin-tab { background: none; border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 9px 18px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; }
 .admin-tab.active { background: var(--color-accent); color: #0A1420; border-color: var(--color-accent); }
 .admin-panel { padding: 24px 0 64px; }
@@ -155,23 +155,24 @@ button { font-family: inherit; cursor: pointer; }
 .toggle.on::after { transform: translateX(18px); }
 .add-package-form { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 10px; margin-bottom: 20px; align-items: end; }
 .add-package-form .field { margin-bottom: 0; }
-.lightbox { position: fixed; inset: 0; background: rgba(6,10,20,.9); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 30px; }
 .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
 .access-denied { min-height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 20px; }
 
 @media (max-width: 900px) {
-  .hero-inner { grid-template-columns: 1fr; text-align: center; padding-top: 20px; }
+  .hero-inner { grid-template-columns: 1fr; text-align: center; padding-top: 10px; }
   .hero p { margin-left: auto; margin-right: auto; }
   .hero-actions { justify-content: center; }
   .hero-art { order: -1; }
   .package-grid { grid-template-columns: repeat(2, 1fr); }
-  .order-row { grid-template-columns: 1fr 1fr; row-gap: 8px; }
+  .list-row { grid-template-columns: 1fr 1fr; row-gap: 8px; }
   .add-package-form { grid-template-columns: 1fr 1fr; }
+  .wallet-card { justify-content: center; text-align: center; }
 }
 @media (max-width: 560px) {
   .package-grid { grid-template-columns: 1fr; }
-  .hero h1 { font-size: 32px; }
+  .hero h1 { font-size: 30px; }
   .user-chip .name { display: none; }
+  .wallet-chip { display: none; }
 }
 </style>
 </head>
@@ -193,11 +194,11 @@ button { font-family: inherit; cursor: pointer; }
     <div class="container hero-inner">
       <div>
         <div class="hero-eyebrow">Mobile Legends: Bang Bang</div>
-        <h1>Diamond ကို စက္ကန့်ပိုင်းအတွင်း<br>Account ထဲ တန်းဝင်အောင် ဝယ်လိုက်ပါ</h1>
-        <p>Game ID ထည့်ပါ၊ KBZPay (သို့) WavePay နဲ့ ငွေချေပါ၊ Screenshot တင်လိုက်ရုံပါပဲ — ကျန်တာ ကျွန်တော်တို့ အမြန်ဆုံး စစ်ဆေးပေးပါမယ်။</p>
+        <h1>Diamond ကို လက်ကျန်ငွေထဲကနေ<br>တစ်ချက်နှိပ်ရုံနဲ့ ဝယ်လိုက်ပါ</h1>
+        <p>အရင်ဆုံး Wallet ထဲ ငွေဖြည့်ပါ (Admin confirm လုပ်ပေးပါမယ်) — ပြီးရင် Diamond အထုပ်တွေကို Wallet ထဲကနေ တစ်ချက်နှိပ်ရုံနဲ့ ဝယ်လို့ရပါပြီ။</p>
         <div class="hero-actions">
           <a href="#packages" class="btn btn-primary">Diamond အထုပ်များ ကြည့်ရန်</a>
-          <a href="#my-orders" class="btn btn-ghost">အော်ဒါမှတ်တမ်း</a>
+          <a href="#history" class="btn btn-ghost">မှတ်တမ်းများ</a>
         </div>
       </div>
       <div class="hero-art">
@@ -217,6 +218,8 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </section>
 
+  <section class="container" id="wallet-section-wrap"></section>
+
   <section class="packages" id="packages">
     <div class="container">
       <div class="section-heading"><h2>Diamond အထုပ်များ</h2><p>အထုပ်ရွေးပြီး "ဝယ်မည်" ကိုနှိပ်ပါ</p></div>
@@ -224,10 +227,17 @@ button { font-family: inherit; cursor: pointer; }
     </div>
   </section>
 
-  <section class="orders-section" id="my-orders">
+  <section class="list-section" id="history">
     <div class="container">
-      <div class="section-heading"><h2>အော်ဒါမှတ်တမ်း</h2><p>သင်တင်ခဲ့တဲ့ အော်ဒါများနှင့် အခြေအနေ</p></div>
-      <div id="orders-list"><div class="empty-state">အော်ဒါများကြည့်ရှုရန် Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
+      <div class="section-heading"><h2>ငွေဖြည့်မှတ်တမ်း</h2><p>Wallet ထဲ ငွေဖြည့်ခဲ့တဲ့ မှတ်တမ်း</p></div>
+      <div id="deposits-list"><div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
+    </div>
+  </section>
+
+  <section class="list-section">
+    <div class="container">
+      <div class="section-heading"><h2>အော်ဒါမှတ်တမ်း</h2><p>ဝယ်ယူခဲ့တဲ့ Diamond အထုပ်များနှင့် အခြေအနေ</p></div>
+      <div id="orders-list"><div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
     </div>
   </section>
 
@@ -245,21 +255,37 @@ button { font-family: inherit; cursor: pointer; }
   <div id="admin-content" class="hidden">
     <div class="container">
       <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="orders">Order များ</button>
+        <button class="admin-tab active" data-tab="deposits">ငွေဖြည့်တောင်းဆိုမှုများ</button>
+        <button class="admin-tab" data-tab="orders">Diamond Order များ</button>
         <button class="admin-tab" data-tab="packages">Diamond အထုပ်များ</button>
       </div>
     </div>
 
-    <div class="admin-panel container" id="panel-orders">
+    <div class="admin-panel container" id="panel-deposits">
       <div class="filter-bar">
-        <button class="filter-chip active" data-status="all">အားလုံး</button>
-        <button class="filter-chip" data-status="pending">စောင့်ဆိုင်းဆဲ</button>
-        <button class="filter-chip" data-status="confirmed">အတည်ပြုပြီး</button>
-        <button class="filter-chip" data-status="rejected">ငြင်းပယ်ထား</button>
+        <button class="filter-chip active" data-status="pending" data-scope="deposits">စောင့်ဆိုင်းဆဲ</button>
+        <button class="filter-chip" data-status="all" data-scope="deposits">အားလုံး</button>
+        <button class="filter-chip" data-status="confirmed" data-scope="deposits">အတည်ပြုပြီး</button>
+        <button class="filter-chip" data-status="rejected" data-scope="deposits">ငြင်းပယ်ထား</button>
       </div>
       <div class="table-card">
         <table class="data-table">
-          <thead><tr><th>ဝယ်သူ</th><th>အထုပ်</th><th>Game ID</th><th>ငွေချေမှု</th><th>Screenshot</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
+          <thead><tr><th>ဖောက်သည်</th><th>ပမာဏ</th><th>နည်းလမ်း</th><th>Screenshot</th><th>အချိန်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
+          <tbody id="deposits-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-panel container hidden" id="panel-orders">
+      <div class="filter-bar">
+        <button class="filter-chip active" data-status="pending" data-scope="orders">စောင့်ဆိုင်းဆဲ</button>
+        <button class="filter-chip" data-status="all" data-scope="orders">အားလုံး</button>
+        <button class="filter-chip" data-status="confirmed" data-scope="orders">ပေးပြီး</button>
+        <button class="filter-chip" data-status="rejected" data-scope="orders">ငြင်းပယ်ထား</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>ဝယ်သူ</th><th>အထုပ်</th><th>Game ID</th><th>အချိန်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
           <tbody id="orders-tbody"></tbody>
         </table>
       </div>
@@ -284,28 +310,49 @@ button { font-family: inherit; cursor: pointer; }
   </div>
 </div>
 
-<!-- Order Modal -->
+<!-- Deposit (Top-up) Modal -->
+<div class="modal-backdrop hidden" id="deposit-modal">
+  <div class="modal">
+    <h3>Wallet ငွေဖြည့်ရန်</h3>
+    <div class="modal-sub">ငွေဖြည့်ပြီး Admin confirm လုပ်ပေးတာနဲ့ Wallet ထဲ ငွေဝင်ပါမယ်</div>
+    <form id="deposit-form">
+      <div class="field">
+        <label for="deposit-amount">ဖြည့်မည့် ပမာဏ (Ks)</label>
+        <input type="number" id="deposit-amount" min="500" step="1" required placeholder="ဥပမာ - 10000">
+      </div>
+      <div class="field">
+        <label>ငွေချေမှုနည်းလမ်း</label>
+        <select id="deposit-method"><option value="kbzpay">KBZPay</option><option value="wavepay">WavePay</option></select>
+      </div>
+      <div class="payment-box"><span>ငွေလွှဲရန် နံပါတ်</span><span class="num" id="deposit-payment-number"></span></div>
+      <div class="field">
+        <label>ငွေလွှဲပြီး Screenshot တင်ပါ</label>
+        <label class="file-drop" id="deposit-file-label">
+          <span id="deposit-file-text">ဓာတ်ပုံရွေးရန် နှိပ်ပါ</span>
+          <input type="file" id="deposit-screenshot" accept="image/*" required style="display:none">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="deposit-cancel">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn btn-primary" id="deposit-submit">ငွေဖြည့်တောင်းဆိုမည်</button>
+      </div>
+      <div class="form-msg" id="deposit-form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Order (Buy diamond) Modal -->
 <div class="modal-backdrop hidden" id="order-modal">
   <div class="modal">
     <h3 id="modal-package-name">Diamond ဝယ်ယူရန်</h3>
     <div class="modal-sub" id="modal-package-price"></div>
+    <div class="balance-note" id="modal-balance-note"></div>
     <form id="order-form">
       <div class="field"><label for="game-id">Game ID</label><input type="text" id="game-id" required placeholder="ဥပမာ - 123456789"></div>
       <div class="field"><label for="zone-id">Zone ID</label><input type="text" id="zone-id" placeholder="ဥပမာ - 2001"></div>
-      <div class="field"><label>ငွေချေမှုနည်းလမ်း</label>
-        <select id="payment-method"><option value="kbzpay">KBZPay</option><option value="wavepay">WavePay</option></select>
-      </div>
-      <div class="payment-box" id="payment-box"><span>ငွေလွှဲရန် နံပါတ်</span><span class="num" id="payment-number"></span></div>
-      <div class="field">
-        <label>ငွေလွှဲပြီး Screenshot တင်ပါ</label>
-        <label class="file-drop" id="file-drop-label">
-          <span id="file-drop-text">ဓာတ်ပုံရွေးရန် နှိပ်ပါ</span>
-          <input type="file" id="screenshot" accept="image/*" required style="display:none">
-        </label>
-      </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" id="modal-cancel">မလုပ်တော့ပါ</button>
-        <button type="submit" class="btn btn-primary" id="modal-submit">အော်ဒါတင်မည်</button>
+        <button type="submit" class="btn btn-primary" id="modal-submit">Wallet ထဲကနေ ဝယ်မည်</button>
       </div>
       <div class="form-msg" id="form-msg"></div>
     </form>
@@ -319,11 +366,11 @@ button { font-family: inherit; cursor: pointer; }
    EDIT ME — Supabase project + payment numbers
    ========================================================= */
 const APP_CONFIG = {
-  SUPABASE_URL: "https://tsrlcznrvjvbwgudsdzm.supabase.co",
-  SUPABASE_ANON_KEY: "sb_publishable_xlOqTr2bTZwPZRjcUSgg7w_f7gp0PFa",
+  SUPABASE_URL: "https://YOUR-PROJECT-REF.supabase.co",
+  SUPABASE_ANON_KEY: "YOUR-SUPABASE-ANON-KEY",
   PAYMENT_NUMBERS: {
-    kbzpay: { label: "KBZPay", number: "09453301116", name: "Thue Ta" },
-    wavepay: { label: "WavePay", number: "09453301116", name: "Aung Thein Lin" }
+    kbzpay: { label: "KBZPay", number: "09xxxxxxxxx", name: "Your Name" },
+    wavepay: { label: "WavePay", number: "09xxxxxxxxx", name: "Your Name" }
   }
 };
 
@@ -334,9 +381,11 @@ let currentUser = null;
 let currentProfile = null;
 let selectedPackage = null;
 let packagesCache = [];
-let ordersCache = [];
-let activeStatusFilter = "all";
-let view = "store"; // "store" | "admin"
+let ordersCacheAdmin = [];
+let depositsCacheAdmin = [];
+let activeOrderFilter = "pending";
+let activeDepositFilter = "pending";
+let view = "store";
 
 const authArea = document.getElementById("auth-area");
 
@@ -353,11 +402,20 @@ async function signOut() { await sb.auth.signOut(); location.reload(); }
 async function getCurrentProfile() {
   const { data: { user } } = await sb.auth.getUser();
   if (!user) return { user: null, profile: null };
-  const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
-  return { user, profile };
+  const { data: profile, error } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  if (error) console.error("profile fetch error:", error);
+  return { user, profile: profile || null };
 }
 
-/* ---------------- Auth area (shared header) ---------------- */
+async function refreshProfile() {
+  const r = await getCurrentProfile();
+  currentUser = r.user;
+  currentProfile = r.profile;
+  renderAuthArea();
+  renderWalletCard();
+}
+
+/* ---------------- Header: auth + wallet chip ---------------- */
 function renderAuthArea() {
   if (!currentUser) {
     authArea.innerHTML = `
@@ -371,21 +429,38 @@ function renderAuthArea() {
   const name = currentUser.user_metadata?.full_name || currentUser.email;
   const avatar = currentUser.user_metadata?.avatar_url || "";
   const isAdmin = currentProfile?.role === "admin";
+  const balance = currentProfile?.wallet_balance ?? 0;
   authArea.innerHTML = `
+    <div class="wallet-chip">💎 <span class="amt">${formatMMK(balance)}</span></div>
     <div class="user-chip">
       ${avatar ? `<img src="${avatar}" alt="">` : ""}
       <span class="name">${name}</span>
       <button class="btn btn-ghost btn-sm" id="menu-toggle">▾</button>
       <div class="menu" id="user-menu">
-        <a href="#my-orders" id="menu-orders">အော်ဒါများ</a>
+        <a href="#history" id="menu-history">မှတ်တမ်းများ</a>
         ${isAdmin ? `<button id="menu-admin">Admin dashboard</button>` : ""}
         <button id="logout-btn">ထွက်မည်</button>
       </div>
     </div>`;
   document.getElementById("menu-toggle").onclick = () => document.getElementById("user-menu").classList.toggle("open");
   document.getElementById("logout-btn").onclick = signOut;
-  document.getElementById("menu-orders").onclick = () => setView("store");
+  document.getElementById("menu-history").onclick = () => setView("store");
   if (isAdmin) document.getElementById("menu-admin").onclick = () => setView("admin");
+}
+
+function renderWalletCard() {
+  const wrap = document.getElementById("wallet-section-wrap");
+  if (!currentUser) { wrap.innerHTML = ""; return; }
+  const balance = currentProfile?.wallet_balance ?? 0;
+  wrap.innerHTML = `
+    <div class="wallet-card">
+      <div>
+        <div class="label">သင့် Wallet လက်ကျန်ငွေ</div>
+        <div class="balance">${formatMMK(balance)}</div>
+      </div>
+      <button class="btn btn-primary" id="topup-btn">ငွေဖြည့်မည်</button>
+    </div>`;
+  document.getElementById("topup-btn").onclick = openDepositModal;
 }
 
 function setView(next) {
@@ -419,7 +494,88 @@ function renderPackages(packages) {
   grid.querySelectorAll("button[data-id]").forEach(btn => btn.onclick = () => openOrderModal(btn.dataset.id));
 }
 
-/* ---------------- STORE: order modal ---------------- */
+/* ---------------- Deposit (top-up) modal ---------------- */
+const depositModal = document.getElementById("deposit-modal");
+const depositForm = document.getElementById("deposit-form");
+const depositMsg = document.getElementById("deposit-form-msg");
+
+function openDepositModal() {
+  if (!currentUser) { alert("Wallet ငွေဖြည့်ရန် Google account ဖြင့် အရင်လော့ဂ်အင်ဝင်ပါ"); signInWithGoogle(); return; }
+  depositForm.reset();
+  updateDepositPaymentBox();
+  document.getElementById("deposit-file-text").textContent = "ဓာတ်ပုံရွေးရန် နှိပ်ပါ";
+  document.getElementById("deposit-file-label").classList.remove("has-file");
+  depositMsg.textContent = "";
+  depositModal.classList.remove("hidden");
+}
+function updateDepositPaymentBox() {
+  const method = document.getElementById("deposit-method").value;
+  const info = APP_CONFIG.PAYMENT_NUMBERS[method];
+  document.getElementById("deposit-payment-number").textContent = `${info.number} (${info.name})`;
+}
+document.getElementById("deposit-method").addEventListener("change", updateDepositPaymentBox);
+document.getElementById("deposit-cancel").onclick = () => depositModal.classList.add("hidden");
+document.getElementById("deposit-screenshot").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById("deposit-file-text").textContent = file.name;
+    document.getElementById("deposit-file-label").classList.add("has-file");
+  }
+});
+
+depositForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("deposit-submit");
+  submitBtn.disabled = true;
+  depositMsg.textContent = ""; depositMsg.className = "form-msg";
+  try {
+    const file = document.getElementById("deposit-screenshot").files[0];
+    if (!file) throw new Error("Screenshot ရွေးပေးပါ");
+    const amount = Number(document.getElementById("deposit-amount").value);
+    if (!amount || amount <= 0) throw new Error("ပမာဏ မှန်ကန်အောင် ထည့်ပါ");
+
+    const path = `${currentUser.id}/deposit-${Date.now()}-${file.name}`;
+    const { error: uploadError } = await sb.storage.from("payment-screenshots").upload(path, file);
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = sb.storage.from("payment-screenshots").getPublicUrl(path);
+
+    const { error: insertError } = await sb.from("deposits").insert({
+      user_id: currentUser.id,
+      amount: amount,
+      payment_method: document.getElementById("deposit-method").value,
+      screenshot_url: publicUrlData.publicUrl,
+      status: "pending"
+    });
+    if (insertError) throw insertError;
+
+    depositMsg.textContent = "ငွေဖြည့်တောင်းဆိုမှု တင်ပြီးပါပြီ! Admin confirm လုပ်ပြီးရင် Wallet ထဲ ငွေဝင်ပါမယ်။";
+    depositMsg.classList.add("success");
+    await loadMyDeposits();
+    setTimeout(() => depositModal.classList.add("hidden"), 1600);
+  } catch (err) {
+    depositMsg.textContent = err.message || "အမှားတစ်ခုဖြစ်သွားပါသည်";
+    depositMsg.classList.add("error");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadMyDeposits() {
+  const el = document.getElementById("deposits-list");
+  if (!currentUser) { el.innerHTML = `<div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
+  const { data, error } = await sb.from("deposits").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  if (!data || !data.length) { el.innerHTML = `<div class="empty-state">ငွေဖြည့်မှတ်တမ်း မရှိသေးပါ</div>`; return; }
+  el.innerHTML = data.map(d => `
+    <div class="list-row">
+      <div><div>${formatMMK(d.amount)} ဖြည့်ခဲ့သည်</div><div class="row-date">${new Date(d.created_at).toLocaleString("my-MM")}</div></div>
+      <div>${d.payment_method}</div>
+      <div>${d.admin_note ? d.admin_note : ""}</div>
+      <div><span class="status-pill status-${d.status}">${statusLabel(d.status)}</span></div>
+    </div>`).join("");
+}
+
+/* ---------------- Order (buy diamond via wallet) modal ---------------- */
 const modal = document.getElementById("order-modal");
 const orderForm = document.getElementById("order-form");
 const formMsg = document.getElementById("form-msg");
@@ -430,27 +586,27 @@ function openOrderModal(packageId) {
   if (!selectedPackage) return;
   document.getElementById("modal-package-name").textContent = `${selectedPackage.name} — ${selectedPackage.diamond_amount} Diamond`;
   document.getElementById("modal-package-price").textContent = formatMMK(selectedPackage.price_mmk);
+
+  const balance = currentProfile?.wallet_balance ?? 0;
+  const note = document.getElementById("modal-balance-note");
+  if (balance < selectedPackage.price_mmk) {
+    note.className = "balance-note low";
+    note.innerHTML = `လက်ကျန်ငွေ ${formatMMK(balance)} ပဲ ရှိပါတယ် — ${formatMMK(selectedPackage.price_mmk - balance)} ထပ်ဖြည့်ပါ။ <a href="#" id="note-topup-link" style="color:var(--color-accent);text-decoration:underline">ငွေဖြည့်ရန်</a>`;
+    document.getElementById("modal-submit").disabled = true;
+  } else {
+    note.className = "balance-note";
+    note.textContent = `လက်ကျန်ငွေ: ${formatMMK(balance)}`;
+    document.getElementById("modal-submit").disabled = false;
+  }
+
   orderForm.reset();
-  updatePaymentBox();
-  document.getElementById("file-drop-text").textContent = "ဓာတ်ပုံရွေးရန် နှိပ်ပါ";
-  document.getElementById("file-drop-label").classList.remove("has-file");
   formMsg.textContent = "";
   modal.classList.remove("hidden");
+
+  const topupLink = document.getElementById("note-topup-link");
+  if (topupLink) topupLink.onclick = (e) => { e.preventDefault(); modal.classList.add("hidden"); openDepositModal(); };
 }
-function updatePaymentBox() {
-  const method = document.getElementById("payment-method").value;
-  const info = APP_CONFIG.PAYMENT_NUMBERS[method];
-  document.getElementById("payment-number").textContent = `${info.number} (${info.name})`;
-}
-document.getElementById("payment-method").addEventListener("change", updatePaymentBox);
 document.getElementById("modal-cancel").onclick = () => modal.classList.add("hidden");
-document.getElementById("screenshot").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    document.getElementById("file-drop-text").textContent = file.name;
-    document.getElementById("file-drop-label").classList.add("has-file");
-  }
-});
 
 orderForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -458,44 +614,38 @@ orderForm.addEventListener("submit", async (e) => {
   submitBtn.disabled = true;
   formMsg.textContent = ""; formMsg.className = "form-msg";
   try {
-    const file = document.getElementById("screenshot").files[0];
-    if (!file) throw new Error("Screenshot ရွေးပေးပါ");
-    const path = `${currentUser.id}/${Date.now()}-${file.name}`;
-    const { error: uploadError } = await sb.storage.from("payment-screenshots").upload(path, file);
-    if (uploadError) throw uploadError;
-    const { data: publicUrlData } = sb.storage.from("payment-screenshots").getPublicUrl(path);
-    const { error: insertError } = await sb.from("orders").insert({
-      user_id: currentUser.id,
-      package_id: selectedPackage.id,
-      game_user_id: document.getElementById("game-id").value.trim(),
-      game_zone_id: document.getElementById("zone-id").value.trim(),
-      payment_method: document.getElementById("payment-method").value,
-      screenshot_url: publicUrlData.publicUrl,
-      status: "pending"
+    const { error } = await sb.rpc("place_order", {
+      p_package_id: selectedPackage.id,
+      p_game_user_id: document.getElementById("game-id").value.trim(),
+      p_game_zone_id: document.getElementById("zone-id").value.trim()
     });
-    if (insertError) throw insertError;
-    formMsg.textContent = "အော်ဒါတင်ပြီးပါပြီ! ခဏအတွင်း စစ်ဆေးပြီး Diamond ထည့်ပေးပါမယ်။";
+    if (error) {
+      if (error.message && error.message.includes("INSUFFICIENT_BALANCE")) {
+        throw new Error("လက်ကျန်ငွေ မလုံလောက်ပါ — Wallet ထဲ ငွေထပ်ဖြည့်ပါ");
+      }
+      throw error;
+    }
+    formMsg.textContent = "ဝယ်ယူမှု အောင်မြင်ပါသည်! ခဏအတွင်း Diamond ထည့်ပေးပါမယ်။";
     formMsg.classList.add("success");
+    await refreshProfile();
     await loadMyOrders();
     setTimeout(() => modal.classList.add("hidden"), 1400);
   } catch (err) {
     formMsg.textContent = err.message || "အမှားတစ်ခုဖြစ်သွားပါသည်";
     formMsg.classList.add("error");
-  } finally {
     submitBtn.disabled = false;
   }
 });
 
-/* ---------------- STORE: my orders ---------------- */
 async function loadMyOrders() {
   const ordersList = document.getElementById("orders-list");
-  if (!currentUser) { ordersList.innerHTML = `<div class="empty-state">အော်ဒါများကြည့်ရှုရန် Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
+  if (!currentUser) { ordersList.innerHTML = `<div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
   const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk)").eq("user_id", currentUser.id).order("created_at", { ascending: false });
   if (error) { console.error(error); return; }
   if (!data || !data.length) { ordersList.innerHTML = `<div class="empty-state">အော်ဒါများ မရှိသေးပါ</div>`; return; }
   ordersList.innerHTML = data.map(o => `
-    <div class="order-row">
-      <div><div>${o.diamond_packages?.name || ""} — ${o.diamond_packages?.diamond_amount || ""} Diamond</div><div class="order-date">${new Date(o.created_at).toLocaleString("my-MM")}</div></div>
+    <div class="list-row">
+      <div><div>${o.diamond_packages?.name || ""} — ${o.diamond_packages?.diamond_amount || ""} Diamond</div><div class="row-date">${new Date(o.created_at).toLocaleString("my-MM")}</div></div>
       <div>${formatMMK(o.diamond_packages?.price_mmk || 0)}</div>
       <div>Game ID: ${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</div>
       <div><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div>
@@ -508,49 +658,96 @@ async function enterAdmin() {
   document.getElementById("admin-content").classList.add("hidden");
   if (!currentUser || currentProfile?.role !== "admin") { document.getElementById("denied-gate").classList.remove("hidden"); return; }
   document.getElementById("admin-content").classList.remove("hidden");
-  await loadOrders();
+  await loadAdminDeposits();
+  await loadAdminOrders();
   await loadAdminPackages();
 }
 
-async function loadOrders() {
+/* --- admin: deposits --- */
+async function loadAdminDeposits() {
+  const { data, error } = await sb.from("deposits").select("*, profiles(email, full_name)").order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  depositsCacheAdmin = data || [];
+  renderAdminDeposits();
+}
+function renderAdminDeposits() {
+  const tbody = document.getElementById("deposits-tbody");
+  const rows = depositsCacheAdmin.filter(d => activeDepositFilter === "all" || d.status === activeDepositFilter);
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:24px">ငွေဖြည့်တောင်းဆိုမှု မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = rows.map(d => `
+    <tr data-id="${d.id}">
+      <td>${d.profiles?.full_name || d.profiles?.email || d.user_id.slice(0,8)}</td>
+      <td style="color:var(--color-gold);font-weight:700">${formatMMK(d.amount)}</td>
+      <td>${d.payment_method}</td>
+      <td>${d.screenshot_url ? `<img class="thumb" src="${d.screenshot_url}" data-full="${d.screenshot_url}">` : "—"}</td>
+      <td style="color:var(--color-text-muted)">${new Date(d.created_at).toLocaleString("my-MM")}</td>
+      <td><span class="status-pill status-${d.status}">${statusLabel(d.status)}</span></td>
+      <td>${d.status === "pending" ? `
+          <button class="btn btn-success btn-sm" data-action="confirm-deposit" data-id="${d.id}">အတည်ပြု</button>
+          <button class="btn btn-danger btn-sm" data-action="reject-deposit" data-id="${d.id}">ငြင်းပယ်</button>
+        ` : `<span style="color:var(--color-text-muted);font-size:12px">ပြီးစီးပြီး</span>`}</td>
+    </tr>`).join("");
+  tbody.querySelectorAll("img.thumb").forEach(img => img.onclick = () => { document.getElementById("lightbox-img").src = img.dataset.full; document.getElementById("lightbox").classList.remove("hidden"); });
+  tbody.querySelectorAll("button[data-action='confirm-deposit']").forEach(btn => btn.onclick = () => actOnDeposit(btn.dataset.id, "confirm"));
+  tbody.querySelectorAll("button[data-action='reject-deposit']").forEach(btn => btn.onclick = () => actOnDeposit(btn.dataset.id, "reject"));
+}
+async function actOnDeposit(id, action) {
+  const fn = action === "confirm" ? "confirm_deposit" : "reject_deposit";
+  const params = action === "confirm" ? { p_deposit_id: id } : { p_deposit_id: id, p_note: null };
+  const { error } = await sb.rpc(fn, params);
+  if (error) { alert(error.message); return; }
+  await loadAdminDeposits();
+}
+
+/* --- admin: orders --- */
+async function loadAdminOrders() {
   const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk), profiles(email, full_name)").order("created_at", { ascending: false });
   if (error) { console.error(error); return; }
-  ordersCache = data || [];
-  renderOrders();
+  ordersCacheAdmin = data || [];
+  renderAdminOrders();
 }
-function renderOrders() {
+function renderAdminOrders() {
   const tbody = document.getElementById("orders-tbody");
-  const rows = ordersCache.filter(o => activeStatusFilter === "all" || o.status === activeStatusFilter);
-  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:24px">Order မရှိသေးပါ</td></tr>`; return; }
+  const rows = ordersCacheAdmin.filter(o => activeOrderFilter === "all" || o.status === activeOrderFilter);
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:24px">Order မရှိသေးပါ</td></tr>`; return; }
   tbody.innerHTML = rows.map(o => `
     <tr data-id="${o.id}">
       <td>${o.profiles?.full_name || o.profiles?.email || o.user_id.slice(0,8)}</td>
       <td>${o.diamond_packages?.name || ""} (${o.diamond_packages?.diamond_amount || 0} 💎)<br><span style="color:var(--color-gold)">${formatMMK(o.diamond_packages?.price_mmk || 0)}</span></td>
       <td>${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</td>
-      <td>${o.payment_method}</td>
-      <td>${o.screenshot_url ? `<img class="thumb" src="${o.screenshot_url}" data-full="${o.screenshot_url}">` : "—"}</td>
+      <td style="color:var(--color-text-muted)">${new Date(o.created_at).toLocaleString("my-MM")}</td>
       <td><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></td>
       <td>${o.status === "pending" ? `
-          <button class="btn btn-success btn-sm" data-action="confirm" data-id="${o.id}">အတည်ပြု</button>
-          <button class="btn btn-danger btn-sm" data-action="reject" data-id="${o.id}">ငြင်းပယ်</button>
+          <button class="btn btn-success btn-sm" data-action="confirm-order" data-id="${o.id}">Diamond ပေးပြီ</button>
+          <button class="btn btn-danger btn-sm" data-action="reject-order" data-id="${o.id}">ငြင်းပယ် (ပြန်အမ်း)</button>
         ` : `<span style="color:var(--color-text-muted);font-size:12px">ပြီးစီးပြီး</span>`}</td>
     </tr>`).join("");
-  tbody.querySelectorAll("img.thumb").forEach(img => img.onclick = () => { document.getElementById("lightbox-img").src = img.dataset.full; document.getElementById("lightbox").classList.remove("hidden"); });
-  tbody.querySelectorAll("button[data-action]").forEach(btn => btn.onclick = () => updateOrderStatus(btn.dataset.id, btn.dataset.action === "confirm" ? "confirmed" : "rejected"));
+  tbody.querySelectorAll("button[data-action='confirm-order']").forEach(btn => btn.onclick = () => actOnOrder(btn.dataset.id, "confirm"));
+  tbody.querySelectorAll("button[data-action='reject-order']").forEach(btn => btn.onclick = () => actOnOrder(btn.dataset.id, "reject"));
 }
-async function updateOrderStatus(orderId, status) {
-  const { error } = await sb.from("orders").update({ status }).eq("id", orderId);
+async function actOnOrder(id, action) {
+  const fn = action === "confirm" ? "confirm_order" : "reject_order";
+  const params = action === "confirm" ? { p_order_id: id } : { p_order_id: id, p_note: null };
+  const { error } = await sb.rpc(fn, params);
   if (error) { alert(error.message); return; }
-  await loadOrders();
+  await loadAdminOrders();
 }
+
 document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.add("hidden");
-document.querySelectorAll(".filter-chip").forEach(chip => chip.onclick = () => {
-  document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+document.querySelectorAll(".filter-chip[data-scope='deposits']").forEach(chip => chip.onclick = () => {
+  document.querySelectorAll(".filter-chip[data-scope='deposits']").forEach(c => c.classList.remove("active"));
   chip.classList.add("active");
-  activeStatusFilter = chip.dataset.status;
-  renderOrders();
+  activeDepositFilter = chip.dataset.status;
+  renderAdminDeposits();
+});
+document.querySelectorAll(".filter-chip[data-scope='orders']").forEach(chip => chip.onclick = () => {
+  document.querySelectorAll(".filter-chip[data-scope='orders']").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeOrderFilter = chip.dataset.status;
+  renderAdminOrders();
 });
 
+/* --- admin: packages --- */
 async function loadAdminPackages() {
   const { data, error } = await sb.from("diamond_packages").select("*").order("sort_order", { ascending: true });
   if (error) { console.error(error); return; }
@@ -613,18 +810,14 @@ document.querySelectorAll(".admin-tab").forEach(tab => tab.onclick = () => {
 
 /* ---------------- Init ---------------- */
 async function init() {
-  const { user, profile } = await getCurrentProfile();
-  currentUser = user;
-  currentProfile = profile;
-  renderAuthArea();
+  await refreshProfile();
   await loadPackages();
+  await loadMyDeposits();
   await loadMyOrders();
 
   sb.auth.onAuthStateChange(async () => {
-    const r = await getCurrentProfile();
-    currentUser = r.user;
-    currentProfile = r.profile;
-    renderAuthArea();
+    await refreshProfile();
+    await loadMyDeposits();
     await loadMyOrders();
     if (view === "admin") await enterAdmin();
   });
