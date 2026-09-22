@@ -2,1191 +2,639 @@
 <html lang="my">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kilo Taxi — ယာဉ်မောင်း</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AURA DIAMOND — Mobile Legends Diamond Top-Up</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@500;700&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-/* ============================================================
-   KILO TAXI — DESIGN SYSTEM
-   Palette inspired by a Yangon night-taxi meter: deep asphalt
-   navy, meter-amber accent, and a fare-green for money states.
-   ============================================================ */
-
+/* =========================================================
+   1) CONFIG (edit the JS block near the bottom of this file)
+   2) DESIGN TOKENS
+   ========================================================= */
 :root {
-  /* Colors */
-  --ink: #0E1420;          /* asphalt navy - background */
-  --ink-2: #161F30;        /* card surface */
-  --ink-3: #1E2A40;        /* elevated surface / input bg */
-  --line: #2A3650;         /* hairline borders */
-  --paper: #F4F1EA;        /* warm off-white for light zones */
-  --amber: #F5A623;        /* taxi meter amber - primary accent */
-  --amber-dim: #C6820E;
-  --fare-green: #3FBF7F;   /* money / success */
-  --alert-red: #E5484D;
-  --text-hi: #F2F3F7;
-  --text-mid: #A7B0C2;
-  --text-low: #6B7690;
-
-  /* Type */
-  --font-display: "Space Grotesk", "Pyidaungsu", sans-serif;
-  --font-body: "Inter", "Pyidaungsu", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
-
-  /* Radius / shadow */
-  --r-sm: 8px;
-  --r-md: 14px;
-  --r-lg: 22px;
-  --shadow-card: 0 12px 30px -12px rgba(0,0,0,0.5);
+  --color-bg: #0F1626;
+  --color-bg-soft: #121A2E;
+  --color-surface: #182238;
+  --color-surface-alt: #1F2C4A;
+  --color-border: #2B3A5C;
+  --color-text: #EDEFF5;
+  --color-text-muted: #8B93A7;
+  --color-accent: #4FD8E0;
+  --color-accent-strong: #2FB9C4;
+  --color-gold: #F4B740;
+  --color-success: #4CAF7D;
+  --color-danger: #E2635A;
+  --font-display: 'Noto Serif Myanmar', serif;
+  --font-body: 'Noto Sans Myanmar', sans-serif;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --radius-input: 10px;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-html, body {
-  height: 100%;
-  background: var(--ink);
-  color: var(--text-hi);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-}
-
+* { box-sizing: border-box; }
+html { scroll-padding-top: 90px; }
 body {
-  min-height: 100vh;
-  background-image:
-    radial-gradient(circle at 15% 0%, rgba(245,166,35,0.08), transparent 40%),
-    radial-gradient(circle at 85% 100%, rgba(63,191,127,0.06), transparent 45%);
+  margin: 0; background: var(--color-bg); color: var(--color-text);
+  font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased;
 }
-
-a { color: inherit; text-decoration: none; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
 button { font-family: inherit; cursor: pointer; }
-input, select, textarea { font-family: inherit; }
+.hidden { display: none !important; }
+.container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
 
-::selection { background: var(--amber); color: var(--ink); }
-
-/* ---------------- Layout shells ---------------- */
-
-.kt-shell {
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+/* Header */
+.site-header {
+  position: sticky; top: 0; z-index: 30;
+  background: rgba(15, 22, 38, 0.88); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--color-border);
 }
+.site-header .container { display: flex; align-items: center; justify-content: space-between; min-height: 72px; }
+.brand { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.brand .gem { width: 20px; height: 20px; flex: none; }
+.auth-area { display: flex; align-items: center; gap: 12px; }
 
-.kt-shell-wide {
-  max-width: 1180px;
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-pill); border: 1px solid transparent; font-size: 15px; font-weight: 600; transition: transform .15s, background .15s, border-color .15s; text-decoration: none; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--color-accent); color: #0A1420; }
+.btn-primary:hover { background: var(--color-accent-strong); }
+.btn-ghost { background: transparent; color: var(--color-text); border-color: var(--color-border); }
+.btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.btn-google { background: #fff; color: #1f1f1f; }
+.btn-google:hover { background: #f2f2f2; }
+.btn-google svg { width: 18px; height: 18px; }
+.btn-danger { background: var(--color-danger); color: #fff; }
+.btn-success { background: var(--color-success); color: #06210f; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.user-chip { display: flex; align-items: center; gap: 10px; position: relative; }
+.user-chip img { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--color-border); }
+.user-chip .name { font-size: 14px; color: var(--color-text-muted); }
+.menu { position: absolute; top: 46px; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; min-width: 170px; display: none; flex-direction: column; box-shadow: 0 12px 30px rgba(0,0,0,.35); }
+.menu.open { display: flex; }
+.menu a, .menu button { background: none; border: none; color: var(--color-text); text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+.menu a:hover, .menu button:hover { background: var(--color-surface-alt); }
+
+/* Hero */
+.hero { padding: 72px 0 56px; }
+.hero-inner { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
+.hero-eyebrow { color: var(--color-accent); font-weight: 600; font-size: 15px; margin-bottom: 14px; }
+.hero h1 { font-size: 44px; line-height: 1.25; max-width: 15ch; }
+.hero p { color: var(--color-text-muted); font-size: 17px; max-width: 46ch; margin: 20px 0 28px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-art { display: flex; justify-content: center; }
+.hero-art svg { width: 100%; max-width: 320px; }
+
+/* Sections */
+.section-heading { margin-bottom: 28px; }
+.section-heading h2 { font-size: 28px; }
+.section-heading p { color: var(--color-text-muted); margin-top: 8px; }
+.packages { padding: 20px 0 64px; }
+.package-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.package-card { position: relative; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 26px 22px; display: flex; flex-direction: column; gap: 6px; }
+.package-card.is-popular { border-color: var(--color-gold); background: linear-gradient(180deg, rgba(244,183,64,.08), var(--color-surface) 40%); }
+.package-card .badge { position: absolute; top: -12px; left: 22px; background: var(--color-gold); color: #241a04; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-pill); }
+.package-diamonds { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+.package-diamonds svg { width: 22px; height: 22px; }
+.package-name { color: var(--color-text-muted); font-size: 14px; }
+.package-price { margin-top: 14px; font-size: 22px; font-weight: 700; color: var(--color-gold); }
+.package-card .btn { margin-top: 16px; }
+
+/* Orders */
+.orders-section { padding: 20px 0 72px; }
+.order-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; font-size: 14px; }
+.order-row .order-date { color: var(--color-text-muted); }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 600; width: fit-content; }
+.status-pending { background: rgba(244,183,64,.15); color: var(--color-gold); }
+.status-confirmed { background: rgba(76,175,125,.15); color: var(--color-success); }
+.status-rejected { background: rgba(226,99,90,.15); color: var(--color-danger); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--color-text-muted); border: 1px dashed var(--color-border); border-radius: 14px; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(6,10,20,.7); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+.modal { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 30px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 22px; margin-bottom: 4px; }
+.modal .modal-sub { color: var(--color-text-muted); font-size: 14px; margin-bottom: 20px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--color-text-muted); }
+.field input[type="text"], .field input[type="number"], .field select { width: 100%; padding: 12px 14px; border-radius: var(--radius-input); border: 1px solid var(--color-border); background: var(--color-bg-soft); color: var(--color-text); font-size: 15px; }
+.field input:focus, .field select:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+.payment-box { background: var(--color-bg-soft); border: 1px solid var(--color-border); border-radius: var(--radius-input); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.payment-box .num { font-weight: 700; letter-spacing: .5px; }
+.file-drop { border: 1px dashed var(--color-border); border-radius: var(--radius-input); padding: 18px; text-align: center; color: var(--color-text-muted); font-size: 14px; cursor: pointer; display: block; }
+.file-drop.has-file { border-color: var(--color-accent); color: var(--color-accent); }
+.modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+.modal-actions .btn { flex: 1; }
+.form-msg { font-size: 13px; margin-top: 10px; }
+.form-msg.error { color: var(--color-danger); }
+.form-msg.success { color: var(--color-success); }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--color-border); padding: 28px 0; color: var(--color-text-muted); font-size: 13px; text-align: center; }
+
+/* Admin */
+.admin-tabs { display: flex; gap: 8px; padding: 24px 0 0; }
+.admin-tab { background: none; border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 9px 18px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; }
+.admin-tab.active { background: var(--color-accent); color: #0A1420; border-color: var(--color-accent); }
+.admin-panel { padding: 24px 0 64px; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.filter-chip { background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 7px 16px; border-radius: var(--radius-pill); font-size: 13px; }
+.filter-chip.active { border-color: var(--color-accent); color: var(--color-accent); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th { text-align: left; color: var(--color-text-muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+.data-table td { padding: 12px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--color-border); cursor: zoom-in; }
+.table-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 6px 18px; overflow-x: auto; }
+.inline-input { width: 100%; background: var(--color-bg-soft); border: 1px solid var(--color-border); color: var(--color-text); padding: 7px 10px; border-radius: 8px; font-size: 13px; }
+.toggle { width: 40px; height: 22px; border-radius: 999px; background: var(--color-border); position: relative; border: none; cursor: pointer; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.toggle.on { background: var(--color-accent); }
+.toggle.on::after { transform: translateX(18px); }
+.add-package-form { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 10px; margin-bottom: 20px; align-items: end; }
+.add-package-form .field { margin-bottom: 0; }
+.lightbox { position: fixed; inset: 0; background: rgba(6,10,20,.9); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 30px; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+.access-denied { min-height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 20px; }
+
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; padding-top: 20px; }
+  .hero p { margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-art { order: -1; }
+  .package-grid { grid-template-columns: repeat(2, 1fr); }
+  .order-row { grid-template-columns: 1fr 1fr; row-gap: 8px; }
+  .add-package-form { grid-template-columns: 1fr 1fr; }
 }
-
-.kt-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--line);
-  position: sticky;
-  top: 0;
-  background: rgba(14,20,32,0.85);
-  backdrop-filter: blur(10px);
-  z-index: 20;
-}
-
-.kt-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -0.01em;
-}
-
-.kt-brand .mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(145deg, var(--amber), var(--amber-dim));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--ink);
-  font-weight: 800;
-  font-size: 14px;
-  font-family: var(--font-mono);
-}
-
-.kt-badge {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-mid);
-  border: 1px solid var(--line);
-  border-radius: 100px;
-  padding: 5px 10px;
-}
-
-.kt-main {
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-/* ---------------- Cards ---------------- */
-
-.kt-card {
-  background: var(--ink-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-card);
-}
-
-.kt-card-title {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-hi);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ---------------- Forms ---------------- */
-
-.kt-field { margin-bottom: 14px; }
-
-.kt-label {
-  display: block;
-  font-size: 12.5px;
-  color: var(--text-mid);
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-.kt-input, .kt-select, .kt-textarea {
-  width: 100%;
-  background: var(--ink-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  padding: 12px 14px;
-  color: var(--text-hi);
-  font-size: 14.5px;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.kt-input::placeholder { color: var(--text-low); }
-
-.kt-input:focus, .kt-select:focus, .kt-textarea:focus {
-  outline: none;
-  border-color: var(--amber);
-  background: #22304A;
-}
-
-.kt-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23A7B0C2' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 34px;
-}
-
-/* Zone toggle (inner / outer) */
-.kt-toggle-group {
-  display: flex;
-  background: var(--ink-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  padding: 4px;
-  gap: 4px;
-}
-
-.kt-toggle-option {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-mid);
-  transition: all 0.15s ease;
-}
-
-.kt-toggle-option.active {
-  background: var(--amber);
-  color: var(--ink);
-}
-
-/* ---------------- Buttons ---------------- */
-
-.kt-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 13px 18px;
-  border-radius: var(--r-sm);
-  border: none;
-  font-size: 14.5px;
-  font-weight: 600;
-  transition: transform 0.1s ease, opacity 0.15s ease, background 0.15s ease;
-}
-
-.kt-btn:active { transform: scale(0.98); }
-.kt-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.kt-btn-primary { background: var(--amber); color: var(--ink); }
-.kt-btn-primary:hover:not(:disabled) { background: #ffb43d; }
-
-.kt-btn-ghost {
-  background: transparent;
-  border: 1px solid var(--line);
-  color: var(--text-hi);
-}
-.kt-btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
-
-.kt-btn-danger { background: var(--alert-red); color: #fff; }
-.kt-btn-success { background: var(--fare-green); color: #06251A; }
-
-.kt-btn-sm { padding: 8px 12px; font-size: 13px; width: auto; }
-
-/* ---------------- Fare display ---------------- */
-
-.kt-fare-box {
-  background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.02));
-  border: 1px solid rgba(245,166,35,0.35);
-  border-radius: var(--r-md);
-  padding: 18px;
-  text-align: center;
-}
-
-.kt-fare-label {
-  font-size: 11.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--amber);
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.kt-fare-amount {
-  font-family: var(--font-mono);
-  font-size: 34px;
-  font-weight: 700;
-  color: var(--text-hi);
-  letter-spacing: -0.02em;
-}
-
-.kt-fare-breakdown {
-  margin-top: 10px;
-  font-size: 12.5px;
-  color: var(--text-mid);
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-/* ---------------- Status pills ---------------- */
-
-.kt-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 100px;
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.kt-pill::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.kt-pill-pending { background: rgba(245,166,35,0.15); color: var(--amber); }
-.kt-pill-assigned { background: rgba(94,150,255,0.15); color: #7EA6FF; }
-.kt-pill-ongoing { background: rgba(94,150,255,0.15); color: #7EA6FF; }
-.kt-pill-completed { background: rgba(63,191,127,0.15); color: var(--fare-green); }
-.kt-pill-cancelled { background: rgba(229,72,77,0.15); color: var(--alert-red); }
-.kt-pill-approved { background: rgba(63,191,127,0.15); color: var(--fare-green); }
-.kt-pill-rejected { background: rgba(229,72,77,0.15); color: var(--alert-red); }
-
-/* ---------------- Wallet display ---------------- */
-
-.kt-wallet-card {
-  background: linear-gradient(135deg, #1A2438, #0F1522);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 22px;
-  position: relative;
-  overflow: hidden;
-}
-
-.kt-wallet-card::after {
-  content: "";
-  position: absolute;
-  top: -40%; right: -20%;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(245,166,35,0.15), transparent 70%);
-}
-
-.kt-wallet-label {
-  font-size: 12px;
-  color: var(--text-mid);
-  margin-bottom: 8px;
-}
-
-.kt-wallet-amount {
-  font-family: var(--font-mono);
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-/* ---------------- Table (admin) ---------------- */
-
-.kt-table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-}
-
-.kt-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-.kt-table th {
-  text-align: left;
-  padding: 12px 14px;
-  background: var(--ink-3);
-  color: var(--text-mid);
-  font-weight: 600;
-  font-size: 11.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--line);
-  white-space: nowrap;
-}
-
-.kt-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
-  color: var(--text-hi);
-  white-space: nowrap;
-}
-
-.kt-table tr:last-child td { border-bottom: none; }
-.kt-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-/* ---------------- Grid / stats (admin dashboard) ---------------- */
-
-.kt-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-.kt-stat {
-  background: var(--ink-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: 16px 18px;
-}
-
-.kt-stat-label {
-  font-size: 12px;
-  color: var(--text-mid);
-  margin-bottom: 8px;
-}
-
-.kt-stat-value {
-  font-family: var(--font-mono);
-  font-size: 26px;
-  font-weight: 700;
-}
-
-.kt-stat-value.amber { color: var(--amber); }
-.kt-stat-value.green { color: var(--fare-green); }
-.kt-stat-value.red { color: var(--alert-red); }
-
-/* ---------------- Tabs (admin nav) ---------------- */
-
-.kt-tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  padding-bottom: 1px;
-}
-
-.kt-tab {
-  padding: 12px 16px;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-mid);
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-}
-
-.kt-tab.active {
-  color: var(--amber);
-  border-bottom-color: var(--amber);
-}
-
-.kt-tab-panel { display: none; }
-.kt-tab-panel.active { display: block; }
-
-/* ---------------- Login screens ---------------- */
-
-.kt-login-shell {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.kt-login-card {
-  width: 100%;
-  max-width: 380px;
-}
-
-.kt-login-header {
-  text-align: center;
-  margin-bottom: 26px;
-}
-
-.kt-login-header .mark {
-  width: 52px; height: 52px;
-  border-radius: 16px;
-  background: linear-gradient(145deg, var(--amber), var(--amber-dim));
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 22px;
-  margin: 0 auto 14px;
-}
-
-.kt-login-header h1 {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.kt-login-header p {
-  color: var(--text-mid);
-  font-size: 13.5px;
-  margin-top: 4px;
-}
-
-/* ---------------- Empty states ---------------- */
-
-.kt-empty {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-mid);
-  font-size: 13.5px;
-}
-
-.kt-empty .icon { font-size: 30px; margin-bottom: 10px; opacity: 0.5; }
-
-/* ---------------- Trip list items ---------------- */
-
-.kt-trip-item {
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  background: var(--ink-3);
-}
-
-.kt-trip-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.kt-trip-route {
-  font-size: 13.5px;
-  color: var(--text-hi);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.kt-trip-meta {
-  font-size: 12px;
-  color: var(--text-mid);
-  font-family: var(--font-mono);
-}
-
-/* ---------------- Toast ---------------- */
-
-.kt-toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: var(--ink-3);
-  border: 1px solid var(--line);
-  color: var(--text-hi);
-  padding: 12px 20px;
-  border-radius: var(--r-sm);
-  font-size: 13.5px;
-  box-shadow: var(--shadow-card);
-  opacity: 0;
-  transition: all 0.25s ease;
-  z-index: 999;
-  max-width: 90vw;
-}
-
-.kt-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.kt-toast-error { border-color: var(--alert-red); }
-.kt-toast-success { border-color: var(--fare-green); }
-
-/* ---------------- Map box ---------------- */
-
-#map { width: 100%; height: 220px; border-radius: var(--r-md); border: 1px solid var(--line); }
-
-/* ---------------- Loader ---------------- */
-
-.kt-spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.25);
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: kt-spin 0.7s linear infinite;
-  display: inline-block;
-}
-
-@keyframes kt-spin { to { transform: rotate(360deg); } }
-
-/* ---------------- Responsive ---------------- */
-
-@media (min-width: 900px) {
-  .kt-main-grid {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    gap: 20px;
-  }
-}
-
-.kt-sidebar {
-  background: var(--ink-2);
-  border-right: 1px solid var(--line);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.kt-sidebar-link {
-  padding: 11px 14px;
-  border-radius: var(--r-sm);
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--text-mid);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.kt-sidebar-link.active {
-  background: rgba(245,166,35,0.12);
-  color: var(--amber);
-}
-
-.kt-sidebar-link:hover:not(.active) { background: var(--ink-3); color: var(--text-hi); }
-
-/* Utility */
-.kt-flex { display: flex; align-items: center; gap: 8px; }
-.kt-flex-between { display: flex; align-items: center; justify-content: space-between; }
-.kt-muted { color: var(--text-mid); }
-.kt-mono { font-family: var(--font-mono); }
-.kt-hidden { display: none !important; }
-.kt-mt-8 { margin-top: 8px; }
-.kt-mt-16 { margin-top: 16px; }
-
-body, .kt-input, .kt-btn, .kt-label, .kt-card-title, .kt-tab { font-family: "Padauk", "Inter", sans-serif; }
-  .kt-brand { font-family: "Space Grotesk", sans-serif; }
-
-/* ---------------- Live tracking ---------------- */
-#liveMap { width: 100%; height: 260px; border-radius: var(--r-md); border: 1px solid var(--line); }
-
-.kt-live-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.kt-live-stat {
-  background: var(--ink-3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  padding: 12px;
-  text-align: center;
-}
-
-.kt-live-stat-label {
-  font-size: 11px;
-  color: var(--text-mid);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-}
-
-.kt-live-stat-value {
-  font-family: var(--font-mono);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--amber);
-}
-
-.kt-live-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--fare-green);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.kt-live-badge::before {
-  content: "";
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--fare-green);
-  animation: kt-pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes kt-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.3); }
+@media (max-width: 560px) {
+  .package-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 32px; }
+  .user-chip .name { display: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- ============== LOGIN SCREEN ============== -->
-<div class="kt-login-shell" id="loginScreen">
-  <div class="kt-login-card">
-    <div class="kt-login-header">
-      <div class="mark">KT</div>
-      <h1>ယာဉ်မောင်း လော့ဂ်အင်</h1>
-      <p>Admin ပေးထားသော username/password ဖြင့်ဝင်ပါ</p>
-    </div>
-    <div class="kt-card">
-      <div class="kt-field">
-        <label class="kt-label">Username</label>
-        <input type="text" id="loginUsername" class="kt-input" placeholder="username">
-      </div>
-      <div class="kt-field">
-        <label class="kt-label">Password</label>
-        <input type="password" id="loginPassword" class="kt-input" placeholder="••••••••">
-      </div>
-      <button class="kt-btn kt-btn-primary" id="loginBtn">ဝင်မည်</button>
-      <div id="loginError" class="kt-hidden kt-mt-16" style="color: var(--alert-red); font-size: 13px; text-align:center;"></div>
-    </div>
+<header class="site-header">
+  <div class="container">
+    <a href="#" class="brand" id="brand-link">
+      <svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M3 9L12 2L21 9L12 22L3 9Z" fill="#4FD8E0"/><path d="M3 9H21L12 22L3 9Z" fill="#2FB9C4"/></svg>
+      AURA DIAMOND
+    </a>
+    <div class="auth-area" id="auth-area"></div>
   </div>
-</div>
+</header>
 
-<!-- ============== DRIVER APP ============== -->
-<div class="kt-shell kt-hidden" id="appScreen">
-
-  <div class="kt-topbar">
-    <div class="kt-brand"><span class="mark">KT</span> Kilo Taxi</div>
-    <button class="kt-btn kt-btn-ghost kt-btn-sm" id="logoutBtn">ထွက်မည်</button>
-  </div>
-
-  <div class="kt-main">
-
-    <!-- Wallet -->
-    <div class="kt-wallet-card">
-      <div class="kt-wallet-label" id="driverNameLabel">ယာဉ်မောင်း</div>
-      <div class="kt-wallet-amount" id="walletBalance">0 Ks</div>
-      <div class="kt-flex kt-mt-16">
-        <button class="kt-btn kt-btn-primary kt-btn-sm" id="topupOpenBtn">+ ငွေဖြည့်တောင်းမည်</button>
-      </div>
-    </div>
-
-    <!-- Top-up form (toggle) -->
-    <div class="kt-card kt-hidden" id="topupForm">
-      <div class="kt-card-title">💵 ငွေဖြည့်တောင်းဆိုမည်</div>
-      <div class="kt-field">
-        <label class="kt-label">ပမာဏ (Ks)</label>
-        <input type="number" id="topupAmount" class="kt-input" placeholder="ဥပမာ - 5000">
-      </div>
-      <div class="kt-field">
-        <label class="kt-label">မှတ်ချက် (Transfer Ref စသည်)</label>
-        <input type="text" id="topupNote" class="kt-input" placeholder="ဥပမာ - KBZ Pay ref number">
-      </div>
-      <button class="kt-btn kt-btn-primary" id="topupSubmitBtn">တောင်းဆိုမည်</button>
-    </div>
-
-    <!-- Live tracking card (only shown while a trip is ongoing) -->
-    <div class="kt-card kt-hidden" id="liveTrackCard">
-      <div class="kt-card-title kt-flex-between">
-        <span>🧭 Live ခရီးစဉ်</span>
-        <span class="kt-live-badge">GPS Live</span>
-      </div>
-      <div id="liveMap"></div>
-      <div class="kt-live-stats">
-        <div class="kt-live-stat" style="grid-column: 1 / -1;">
-          <div class="kt-live-stat-label">လက်ရှိအမြန်နှုန်း</div>
-          <div class="kt-live-stat-value" id="liveSpeedValue">0 km/h</div>
+<!-- ================= STORE VIEW ================= -->
+<div id="store-view">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <div class="hero-eyebrow">Mobile Legends: Bang Bang</div>
+        <h1>Diamond ကို စက္ကန့်ပိုင်းအတွင်း<br>Account ထဲ တန်းဝင်အောင် ဝယ်လိုက်ပါ</h1>
+        <p>Game ID ထည့်ပါ၊ KBZPay (သို့) WavePay နဲ့ ငွေချေပါ၊ Screenshot တင်လိုက်ရုံပါပဲ — ကျန်တာ ကျွန်တော်တို့ အမြန်ဆုံး စစ်ဆေးပေးပါမယ်။</p>
+        <div class="hero-actions">
+          <a href="#packages" class="btn btn-primary">Diamond အထုပ်များ ကြည့်ရန်</a>
+          <a href="#my-orders" class="btn btn-ghost">အော်ဒါမှတ်တမ်း</a>
         </div>
       </div>
-      <button class="kt-btn kt-btn-success kt-mt-16" id="liveFinishBtn">✅ ခရီးစဉ်ပြီးဆုံးမည်</button>
+      <div class="hero-art">
+        <svg viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="gemGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7FF0F5"/><stop offset="100%" stop-color="#2FB9C4"/></linearGradient>
+            <linearGradient id="gemGradDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#2FB9C4"/><stop offset="100%" stop-color="#144C52"/></linearGradient>
+          </defs>
+          <polygon points="60,110 160,40 260,110 160,120" fill="url(#gemGrad)"/>
+          <polygon points="60,110 160,120 130,280" fill="url(#gemGradDark)" opacity="0.9"/>
+          <polygon points="260,110 160,120 190,280" fill="url(#gemGrad)" opacity="0.75"/>
+          <polygon points="130,280 160,120 190,280 160,300" fill="#F4B740" opacity="0.9"/>
+          <polygon points="60,110 30,120 160,40" fill="#9BF3F7" opacity="0.6"/>
+          <polygon points="260,110 290,120 160,40" fill="#1E8A93" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="packages" id="packages">
+    <div class="container">
+      <div class="section-heading"><h2>Diamond အထုပ်များ</h2><p>အထုပ်ရွေးပြီး "ဝယ်မည်" ကိုနှိပ်ပါ</p></div>
+      <div class="package-grid" id="package-grid"></div>
+    </div>
+  </section>
+
+  <section class="orders-section" id="my-orders">
+    <div class="container">
+      <div class="section-heading"><h2>အော်ဒါမှတ်တမ်း</h2><p>သင်တင်ခဲ့တဲ့ အော်ဒါများနှင့် အခြေအနေ</p></div>
+      <div id="orders-list"><div class="empty-state">အော်ဒါများကြည့်ရှုရန် Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
+    </div>
+  </section>
+
+  <footer class="site-footer"><div class="container">© 2026 AURA DIAMOND — Independent top-up service, not affiliated with Moonton.</div></footer>
+</div>
+
+<!-- ================= ADMIN VIEW ================= -->
+<div id="admin-view" class="hidden">
+  <div class="container access-denied hidden" id="denied-gate">
+    <h2>ဝင်ခွင့်မရှိပါ</h2>
+    <p style="color:var(--color-text-muted)">Admin dashboard သည် Admin များအတွက်သာ ဖြစ်ပါသည်။</p>
+    <button class="btn btn-ghost" id="back-to-store-btn">စတိုးဆိုင်သို့ ပြန်သွားရန်</button>
+  </div>
+
+  <div id="admin-content" class="hidden">
+    <div class="container">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="orders">Order များ</button>
+        <button class="admin-tab" data-tab="packages">Diamond အထုပ်များ</button>
+      </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="kt-tabs">
-      <div class="kt-tab active" data-tab="trips">ခရီးစဉ်များ</div>
-      <div class="kt-tab" data-tab="topups">ငွေဖြည့်မှတ်တမ်း</div>
+    <div class="admin-panel container" id="panel-orders">
+      <div class="filter-bar">
+        <button class="filter-chip active" data-status="all">အားလုံး</button>
+        <button class="filter-chip" data-status="pending">စောင့်ဆိုင်းဆဲ</button>
+        <button class="filter-chip" data-status="confirmed">အတည်ပြုပြီး</button>
+        <button class="filter-chip" data-status="rejected">ငြင်းပယ်ထား</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>ဝယ်သူ</th><th>အထုပ်</th><th>Game ID</th><th>ငွေချေမှု</th><th>Screenshot</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Trips tab -->
-    <div class="kt-tab-panel active" id="panel-trips">
-      <div id="tripsList"></div>
+    <div class="admin-panel container hidden" id="panel-packages">
+      <form class="add-package-form" id="add-package-form">
+        <div class="field"><label>အမည်</label><input class="inline-input" type="text" id="new-name" required></div>
+        <div class="field"><label>Diamond</label><input class="inline-input" type="number" id="new-diamonds" required></div>
+        <div class="field"><label>ဈေးနှုန်း (Ks)</label><input class="inline-input" type="number" id="new-price" required></div>
+        <div class="field"><label>အစီအစဉ်</label><input class="inline-input" type="number" id="new-sort" value="0"></div>
+        <div class="field"><label>&nbsp;</label></div>
+        <button type="submit" class="btn btn-primary btn-sm">အထုပ်အသစ်ထည့်မည်</button>
+      </form>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>အမည်</th><th>Diamond</th><th>ဈေးနှုန်း</th><th>Active</th><th>Popular</th><th></th></tr></thead>
+          <tbody id="packages-tbody"></tbody>
+        </table>
+      </div>
     </div>
-
-    <!-- Topups tab -->
-    <div class="kt-tab-panel" id="panel-topups">
-      <div id="topupsList"></div>
-    </div>
-
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<!-- Order Modal -->
+<div class="modal-backdrop hidden" id="order-modal">
+  <div class="modal">
+    <h3 id="modal-package-name">Diamond ဝယ်ယူရန်</h3>
+    <div class="modal-sub" id="modal-package-price"></div>
+    <form id="order-form">
+      <div class="field"><label for="game-id">Game ID</label><input type="text" id="game-id" required placeholder="ဥပမာ - 123456789"></div>
+      <div class="field"><label for="zone-id">Zone ID</label><input type="text" id="zone-id" placeholder="ဥပမာ - 2001"></div>
+      <div class="field"><label>ငွေချေမှုနည်းလမ်း</label>
+        <select id="payment-method"><option value="kbzpay">KBZPay</option><option value="wavepay">WavePay</option></select>
+      </div>
+      <div class="payment-box" id="payment-box"><span>ငွေလွှဲရန် နံပါတ်</span><span class="num" id="payment-number"></span></div>
+      <div class="field">
+        <label>ငွေလွှဲပြီး Screenshot တင်ပါ</label>
+        <label class="file-drop" id="file-drop-label">
+          <span id="file-drop-text">ဓာတ်ပုံရွေးရန် နှိပ်ပါ</span>
+          <input type="file" id="screenshot" accept="image/*" required style="display:none">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modal-cancel">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn btn-primary" id="modal-submit">အော်ဒါတင်မည်</button>
+      </div>
+      <div class="form-msg" id="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="lightbox"><img id="lightbox-img" src="" alt="screenshot"></div>
+
 <script>
-  // ============================================================
-  // ဒီနေရာမှာ Supabase URL / Key နဲ့ Google Maps API Key ဖြည့်ပါ
-  // ============================================================
-  const SUPABASE_URL = "https://wnceuosxvcbuijgazfjg.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_qgef5kcWKT5aghNNhRd6xg_e0WEXUx9";
-  const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
-
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  function calculateFare(startFare, perKmRate, distanceKm) {
-    return Math.round(Number(startFare) + Number(perKmRate) * Number(distanceKm));
+/* =========================================================
+   EDIT ME — Supabase project + payment numbers
+   ========================================================= */
+const APP_CONFIG = {
+  SUPABASE_URL: "https://tsrlcznrvjvbwgudsdzm.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_xlOqTr2bTZwPZRjcUSgg7w_f7gp0PFa",
+  PAYMENT_NUMBERS: {
+    kbzpay: { label: "KBZPay", number: "09453301116", name: "Thue Ta" },
+    wavepay: { label: "WavePay", number: "09453301116", name: "Aung Thein Lin" }
   }
+};
 
-  function formatMMK(amount) {
-    return Number(amount).toLocaleString("en-US") + " Ks";
-  }
+const { createClient } = supabase;
+const sb = createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY);
 
-  function showToast(message, type = "info") {
-    const existing = document.querySelector(".kt-toast");
-    if (existing) existing.remove();
-    const toast = document.createElement("div");
-    toast.className = `kt-toast kt-toast-${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add("show"));
-    setTimeout(() => {
-      toast.classList.remove("show");
-      setTimeout(() => toast.remove(), 300);
-    }, 3200);
+let currentUser = null;
+let currentProfile = null;
+let selectedPackage = null;
+let packagesCache = [];
+let ordersCache = [];
+let activeStatusFilter = "all";
+let view = "store"; // "store" | "admin"
+
+const authArea = document.getElementById("auth-area");
+
+function formatMMK(n) { return Number(n).toLocaleString("en-US") + " Ks"; }
+function statusLabel(s) { return s === "pending" ? "စောင့်ဆိုင်းဆဲ" : s === "confirmed" ? "အတည်ပြုပြီး" : s === "rejected" ? "ငြင်းပယ်ခံရသည်" : s; }
+function diamondIcon() { return `<svg viewBox="0 0 24 24" fill="none"><path d="M3 9L12 2L21 9L12 22L3 9Z" fill="#4FD8E0"/><path d="M3 9H21L12 22L3 9Z" fill="#2FB9C4"/></svg>`; }
+
+async function signInWithGoogle() {
+  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + window.location.pathname } });
+  if (error) alert("Sign-in အမှား - " + error.message);
+}
+async function signOut() { await sb.auth.signOut(); location.reload(); }
+
+async function getCurrentProfile() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { user: null, profile: null };
+  const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  return { user, profile };
+}
+
+/* ---------------- Auth area (shared header) ---------------- */
+function renderAuthArea() {
+  if (!currentUser) {
+    authArea.innerHTML = `
+      <button class="btn btn-google" id="google-btn">
+        <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-1.9 14.3-5.1l-6.6-5.4C29.6 35.4 26.9 36 24 36c-5.3 0-9.7-3.1-11.3-7.6l-6.6 5.1C9.6 39.6 16.3 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.5l6.6 5.4C39.9 37 44 31 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        Google (Gmail) ဖြင့် ဝင်ရန်
+      </button>`;
+    document.getElementById("google-btn").onclick = signInWithGoogle;
+    return;
   }
+  const name = currentUser.user_metadata?.full_name || currentUser.email;
+  const avatar = currentUser.user_metadata?.avatar_url || "";
+  const isAdmin = currentProfile?.role === "admin";
+  authArea.innerHTML = `
+    <div class="user-chip">
+      ${avatar ? `<img src="${avatar}" alt="">` : ""}
+      <span class="name">${name}</span>
+      <button class="btn btn-ghost btn-sm" id="menu-toggle">▾</button>
+      <div class="menu" id="user-menu">
+        <a href="#my-orders" id="menu-orders">အော်ဒါများ</a>
+        ${isAdmin ? `<button id="menu-admin">Admin dashboard</button>` : ""}
+        <button id="logout-btn">ထွက်မည်</button>
+      </div>
+    </div>`;
+  document.getElementById("menu-toggle").onclick = () => document.getElementById("user-menu").classList.toggle("open");
+  document.getElementById("logout-btn").onclick = signOut;
+  document.getElementById("menu-orders").onclick = () => setView("store");
+  if (isAdmin) document.getElementById("menu-admin").onclick = () => setView("admin");
+}
+
+function setView(next) {
+  view = next;
+  document.getElementById("store-view").classList.toggle("hidden", view !== "store");
+  document.getElementById("admin-view").classList.toggle("hidden", view !== "admin");
+  if (view === "admin") enterAdmin();
+  window.scrollTo({ top: 0 });
+}
+document.getElementById("brand-link").onclick = (e) => { e.preventDefault(); setView("store"); };
+document.getElementById("back-to-store-btn").onclick = () => setView("store");
+
+/* ---------------- STORE: packages ---------------- */
+async function loadPackages() {
+  const { data, error } = await sb.from("diamond_packages").select("*").eq("is_active", true).order("sort_order", { ascending: true });
+  if (error) { console.error(error); return; }
+  renderPackages(data || []);
+}
+function renderPackages(packages) {
+  packagesCache = packages;
+  const grid = document.getElementById("package-grid");
+  if (!packages.length) { grid.innerHTML = `<div class="empty-state">လောလောဆယ် ရောင်းရန်အထုပ် မရှိသေးပါ</div>`; return; }
+  grid.innerHTML = packages.map(p => `
+    <div class="package-card ${p.is_popular ? "is-popular" : ""}">
+      ${p.is_popular ? `<span class="badge">အရောင်းရဆုံး</span>` : ""}
+      <div class="package-diamonds">${diamondIcon()} ${p.diamond_amount}</div>
+      <div class="package-name">${p.name}</div>
+      <div class="package-price">${formatMMK(p.price_mmk)}</div>
+      <button class="btn btn-primary" data-id="${p.id}">ဝယ်မည်</button>
+    </div>`).join("");
+  grid.querySelectorAll("button[data-id]").forEach(btn => btn.onclick = () => openOrderModal(btn.dataset.id));
+}
+
+/* ---------------- STORE: order modal ---------------- */
+const modal = document.getElementById("order-modal");
+const orderForm = document.getElementById("order-form");
+const formMsg = document.getElementById("form-msg");
+
+function openOrderModal(packageId) {
+  if (!currentUser) { alert("အော်ဒါတင်ရန် Google account ဖြင့် အရင်လော့ဂ်အင်ဝင်ပါ"); signInWithGoogle(); return; }
+  selectedPackage = packagesCache.find(p => p.id === packageId);
+  if (!selectedPackage) return;
+  document.getElementById("modal-package-name").textContent = `${selectedPackage.name} — ${selectedPackage.diamond_amount} Diamond`;
+  document.getElementById("modal-package-price").textContent = formatMMK(selectedPackage.price_mmk);
+  orderForm.reset();
+  updatePaymentBox();
+  document.getElementById("file-drop-text").textContent = "ဓာတ်ပုံရွေးရန် နှိပ်ပါ";
+  document.getElementById("file-drop-label").classList.remove("has-file");
+  formMsg.textContent = "";
+  modal.classList.remove("hidden");
+}
+function updatePaymentBox() {
+  const method = document.getElementById("payment-method").value;
+  const info = APP_CONFIG.PAYMENT_NUMBERS[method];
+  document.getElementById("payment-number").textContent = `${info.number} (${info.name})`;
+}
+document.getElementById("payment-method").addEventListener("change", updatePaymentBox);
+document.getElementById("modal-cancel").onclick = () => modal.classList.add("hidden");
+document.getElementById("screenshot").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById("file-drop-text").textContent = file.name;
+    document.getElementById("file-drop-label").classList.add("has-file");
+  }
+});
+
+orderForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("modal-submit");
+  submitBtn.disabled = true;
+  formMsg.textContent = ""; formMsg.className = "form-msg";
+  try {
+    const file = document.getElementById("screenshot").files[0];
+    if (!file) throw new Error("Screenshot ရွေးပေးပါ");
+    const path = `${currentUser.id}/${Date.now()}-${file.name}`;
+    const { error: uploadError } = await sb.storage.from("payment-screenshots").upload(path, file);
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = sb.storage.from("payment-screenshots").getPublicUrl(path);
+    const { error: insertError } = await sb.from("orders").insert({
+      user_id: currentUser.id,
+      package_id: selectedPackage.id,
+      game_user_id: document.getElementById("game-id").value.trim(),
+      game_zone_id: document.getElementById("zone-id").value.trim(),
+      payment_method: document.getElementById("payment-method").value,
+      screenshot_url: publicUrlData.publicUrl,
+      status: "pending"
+    });
+    if (insertError) throw insertError;
+    formMsg.textContent = "အော်ဒါတင်ပြီးပါပြီ! ခဏအတွင်း စစ်ဆေးပြီး Diamond ထည့်ပေးပါမယ်။";
+    formMsg.classList.add("success");
+    await loadMyOrders();
+    setTimeout(() => modal.classList.add("hidden"), 1400);
+  } catch (err) {
+    formMsg.textContent = err.message || "အမှားတစ်ခုဖြစ်သွားပါသည်";
+    formMsg.classList.add("error");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+/* ---------------- STORE: my orders ---------------- */
+async function loadMyOrders() {
+  const ordersList = document.getElementById("orders-list");
+  if (!currentUser) { ordersList.innerHTML = `<div class="empty-state">အော်ဒါများကြည့်ရှုရန် Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
+  const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk)").eq("user_id", currentUser.id).order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  if (!data || !data.length) { ordersList.innerHTML = `<div class="empty-state">အော်ဒါများ မရှိသေးပါ</div>`; return; }
+  ordersList.innerHTML = data.map(o => `
+    <div class="order-row">
+      <div><div>${o.diamond_packages?.name || ""} — ${o.diamond_packages?.diamond_amount || ""} Diamond</div><div class="order-date">${new Date(o.created_at).toLocaleString("my-MM")}</div></div>
+      <div>${formatMMK(o.diamond_packages?.price_mmk || 0)}</div>
+      <div>Game ID: ${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</div>
+      <div><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div>
+    </div>`).join("");
+}
+
+/* ---------------- ADMIN ---------------- */
+async function enterAdmin() {
+  document.getElementById("denied-gate").classList.add("hidden");
+  document.getElementById("admin-content").classList.add("hidden");
+  if (!currentUser || currentProfile?.role !== "admin") { document.getElementById("denied-gate").classList.remove("hidden"); return; }
+  document.getElementById("admin-content").classList.remove("hidden");
+  await loadOrders();
+  await loadAdminPackages();
+}
+
+async function loadOrders() {
+  const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk), profiles(email, full_name)").order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  ordersCache = data || [];
+  renderOrders();
+}
+function renderOrders() {
+  const tbody = document.getElementById("orders-tbody");
+  const rows = ordersCache.filter(o => activeStatusFilter === "all" || o.status === activeStatusFilter);
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:24px">Order မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = rows.map(o => `
+    <tr data-id="${o.id}">
+      <td>${o.profiles?.full_name || o.profiles?.email || o.user_id.slice(0,8)}</td>
+      <td>${o.diamond_packages?.name || ""} (${o.diamond_packages?.diamond_amount || 0} 💎)<br><span style="color:var(--color-gold)">${formatMMK(o.diamond_packages?.price_mmk || 0)}</span></td>
+      <td>${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</td>
+      <td>${o.payment_method}</td>
+      <td>${o.screenshot_url ? `<img class="thumb" src="${o.screenshot_url}" data-full="${o.screenshot_url}">` : "—"}</td>
+      <td><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></td>
+      <td>${o.status === "pending" ? `
+          <button class="btn btn-success btn-sm" data-action="confirm" data-id="${o.id}">အတည်ပြု</button>
+          <button class="btn btn-danger btn-sm" data-action="reject" data-id="${o.id}">ငြင်းပယ်</button>
+        ` : `<span style="color:var(--color-text-muted);font-size:12px">ပြီးစီးပြီး</span>`}</td>
+    </tr>`).join("");
+  tbody.querySelectorAll("img.thumb").forEach(img => img.onclick = () => { document.getElementById("lightbox-img").src = img.dataset.full; document.getElementById("lightbox").classList.remove("hidden"); });
+  tbody.querySelectorAll("button[data-action]").forEach(btn => btn.onclick = () => updateOrderStatus(btn.dataset.id, btn.dataset.action === "confirm" ? "confirmed" : "rejected"));
+}
+async function updateOrderStatus(orderId, status) {
+  const { error } = await sb.from("orders").update({ status }).eq("id", orderId);
+  if (error) { alert(error.message); return; }
+  await loadOrders();
+}
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.add("hidden");
+document.querySelectorAll(".filter-chip").forEach(chip => chip.onclick = () => {
+  document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeStatusFilter = chip.dataset.status;
+  renderOrders();
+});
+
+async function loadAdminPackages() {
+  const { data, error } = await sb.from("diamond_packages").select("*").order("sort_order", { ascending: true });
+  if (error) { console.error(error); return; }
+  renderAdminPackages(data || []);
+}
+function renderAdminPackages(packages) {
+  const tbody = document.getElementById("packages-tbody");
+  if (!packages.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:24px">အထုပ်မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = packages.map(p => `
+    <tr data-id="${p.id}">
+      <td><input class="inline-input" data-field="name" value="${p.name}"></td>
+      <td><input class="inline-input" data-field="diamond_amount" type="number" value="${p.diamond_amount}" style="width:90px"></td>
+      <td><input class="inline-input" data-field="price_mmk" type="number" value="${p.price_mmk}" style="width:110px"></td>
+      <td><button class="toggle ${p.is_active ? "on" : ""}" data-field="is_active"></button></td>
+      <td><button class="toggle ${p.is_popular ? "on" : ""}" data-field="is_popular"></button></td>
+      <td><button class="btn btn-ghost btn-sm" data-action="save">သိမ်းမည်</button> <button class="btn btn-danger btn-sm" data-action="delete">ဖျက်မည်</button></td>
+    </tr>`).join("");
+  tbody.querySelectorAll("button.toggle").forEach(t => t.onclick = () => t.classList.toggle("on"));
+  tbody.querySelectorAll("button[data-action='save']").forEach(btn => btn.onclick = () => savePackageRow(btn.closest("tr")));
+  tbody.querySelectorAll("button[data-action='delete']").forEach(btn => btn.onclick = () => deletePackage(btn.closest("tr").dataset.id));
+}
+async function savePackageRow(row) {
+  const id = row.dataset.id;
+  const payload = {
+    name: row.querySelector("[data-field='name']").value.trim(),
+    diamond_amount: Number(row.querySelector("[data-field='diamond_amount']").value),
+    price_mmk: Number(row.querySelector("[data-field='price_mmk']").value),
+    is_active: row.querySelector("[data-field='is_active']").classList.contains("on"),
+    is_popular: row.querySelector("[data-field='is_popular']").classList.contains("on")
+  };
+  const { error } = await sb.from("diamond_packages").update(payload).eq("id", id);
+  if (error) { alert(error.message); return; }
+  await loadAdminPackages();
+}
+async function deletePackage(id) {
+  if (!confirm("ဤအထုပ်ကို ဖျက်မှာ သေချာပါသလား?")) return;
+  const { error } = await sb.from("diamond_packages").delete().eq("id", id);
+  if (error) { alert(error.message); return; }
+  await loadAdminPackages();
+}
+document.getElementById("add-package-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById("new-name").value.trim(),
+    diamond_amount: Number(document.getElementById("new-diamonds").value),
+    price_mmk: Number(document.getElementById("new-price").value),
+    sort_order: Number(document.getElementById("new-sort").value) || 0
+  };
+  const { error } = await sb.from("diamond_packages").insert(payload);
+  if (error) { alert(error.message); return; }
+  e.target.reset();
+  await loadAdminPackages();
+});
+document.querySelectorAll(".admin-tab").forEach(tab => tab.onclick = () => {
+  document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  document.querySelectorAll(".admin-panel").forEach(p => p.classList.add("hidden"));
+  document.getElementById(`panel-${tab.dataset.tab}`).classList.remove("hidden");
+});
+
+/* ---------------- Init ---------------- */
+async function init() {
+  const { user, profile } = await getCurrentProfile();
+  currentUser = user;
+  currentProfile = profile;
+  renderAuthArea();
+  await loadPackages();
+  await loadMyOrders();
+
+  sb.auth.onAuthStateChange(async () => {
+    const r = await getCurrentProfile();
+    currentUser = r.user;
+    currentProfile = r.profile;
+    renderAuthArea();
+    await loadMyOrders();
+    if (view === "admin") await enterAdmin();
+  });
+
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("user-menu");
+    if (menu && !e.target.closest(".user-chip")) menu.classList.remove("open");
+  });
+}
+init();
 </script>
-<script>
-let currentDriver = null;
-
-// ---- Restore session ----
-window.addEventListener("DOMContentLoaded", () => {
-  const saved = sessionStorage.getItem("kt_driver");
-  if (saved) {
-    currentDriver = JSON.parse(saved);
-    showApp();
-  }
-});
-
-// ---- Login ----
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  const errEl = document.getElementById("loginError");
-  errEl.classList.add("kt-hidden");
-
-  if (!username || !password) {
-    errEl.textContent = "Username / Password ဖြည့်ပေးပါ";
-    errEl.classList.remove("kt-hidden");
-    return;
-  }
-
-  const { data, error } = await supabaseClient
-    .from("drivers")
-    .select("*")
-    .eq("username", username)
-    .eq("password", password)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  if (error || !data) {
-    errEl.textContent = "Username သို့မဟုတ် Password မှားနေပါသည်";
-    errEl.classList.remove("kt-hidden");
-    return;
-  }
-
-  currentDriver = data;
-  sessionStorage.setItem("kt_driver", JSON.stringify(data));
-  showApp();
-});
-
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  sessionStorage.removeItem("kt_driver");
-  location.reload();
-});
-
-function showApp() {
-  document.getElementById("loginScreen").classList.add("kt-hidden");
-  document.getElementById("appScreen").classList.remove("kt-hidden");
-  document.getElementById("driverNameLabel").textContent = `${currentDriver.name} • ${currentDriver.vehicle_no || ""}`;
-  refreshWallet();
-  loadTrips();
-  loadTopups();
-  resumeLiveTrackingIfOngoing();
-
-  // Realtime subscription for this driver's trips & wallet
-  supabaseClient
-    .channel("driver-updates")
-    .on("postgres_changes", { event: "*", schema: "public", table: "trips", filter: `driver_id=eq.${currentDriver.id}` }, () => {
-      loadTrips();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "drivers", filter: `id=eq.${currentDriver.id}` }, () => {
-      refreshWallet();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "topup_requests", filter: `driver_id=eq.${currentDriver.id}` }, () => {
-      loadTopups();
-    })
-    .subscribe();
-}
-
-async function refreshWallet() {
-  const { data } = await supabaseClient.from("drivers").select("wallet_balance").eq("id", currentDriver.id).single();
-  if (data) {
-    currentDriver.wallet_balance = data.wallet_balance;
-    document.getElementById("walletBalance").textContent = formatMMK(data.wallet_balance);
-  }
-}
-
-// ---- Top-up form toggle ----
-document.getElementById("topupOpenBtn").addEventListener("click", () => {
-  document.getElementById("topupForm").classList.toggle("kt-hidden");
-});
-
-document.getElementById("topupSubmitBtn").addEventListener("click", async () => {
-  const amount = Number(document.getElementById("topupAmount").value);
-  const note = document.getElementById("topupNote").value.trim();
-
-  if (!amount || amount <= 0) {
-    showToast("ငွေပမာဏ မှန်ကန်စွာ ဖြည့်ပေးပါ", "error");
-    return;
-  }
-
-  const { error } = await supabaseClient.from("topup_requests").insert({
-    driver_id: currentDriver.id,
-    amount,
-    note,
-    status: "pending",
-  });
-
-  if (error) {
-    showToast("တောင်းဆိုမှု မအောင်မြင်ပါ", "error");
-    return;
-  }
-
-  showToast("Admin ဆီ တောင်းဆိုမှုပို့ပြီးပါပြီ", "success");
-  document.getElementById("topupAmount").value = "";
-  document.getElementById("topupNote").value = "";
-  document.getElementById("topupForm").classList.add("kt-hidden");
-  loadTopups();
-});
-
-// ---- Tabs ----
-document.querySelectorAll(".kt-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    document.querySelectorAll(".kt-tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".kt-tab-panel").forEach(p => p.classList.remove("active"));
-    tab.classList.add("active");
-    document.getElementById(`panel-${tab.dataset.tab}`).classList.add("active");
-  });
-});
-
-// ---- Load assigned trips ----
-async function loadTrips() {
-  const { data, error } = await supabaseClient
-    .from("trips")
-    .select("*")
-    .eq("driver_id", currentDriver.id)
-    .in("status", ["assigned", "ongoing", "completed"])
-    .order("created_at", { ascending: false })
-    .limit(30);
-
-  const list = document.getElementById("tripsList");
-
-  if (error || !data || data.length === 0) {
-    list.innerHTML = `<div class="kt-empty"><div class="icon">🚕</div>ခရီးစဉ် မရှိသေးပါ</div>`;
-    return;
-  }
-
-  list.innerHTML = data.map(t => `
-    <div class="kt-trip-item">
-      <div class="kt-trip-row">
-        <div class="kt-trip-route">📍 ${t.pickup_address} → 🏁 ${t.dropoff_address}</div>
-        <span class="kt-pill kt-pill-${t.status}">${statusLabel(t.status)}</span>
-      </div>
-      <div class="kt-flex-between">
-        <span class="kt-trip-meta">${t.distance_km} km • ${formatMMK(t.total_fare)}</span>
-        <span class="kt-trip-meta">${t.passenger_name} • ${t.passenger_phone}</span>
-      </div>
-      ${t.deduct_amount != null ? `<div class="kt-trip-meta kt-mt-8">💳 Wallet မှ ဖြတ်ငွေ: ${formatMMK(t.deduct_amount)}</div>` : ""}
-      ${t.status === "assigned" ? `<button class="kt-btn kt-btn-primary kt-btn-sm kt-mt-8" onclick="startTrip('${t.id}')">▶ ခရီးစဉ်စမည် (Wallet မှ ${formatMMK(t.deduct_amount || 0)} ချက်ချင်းဖြတ်မည်)</button>` : ""}
-      ${t.status === "ongoing" ? `<button class="kt-btn kt-btn-success kt-btn-sm kt-mt-8" onclick="finishTrip('${t.id}')">✅ ခရီးစဉ်ပြီးဆုံးမည်</button>` : ""}
-    </div>
-  `).join("");
-}
-
-function statusLabel(status) {
-  const map = { pending: "စောင့်ဆိုင်းဆဲ", assigned: "တာဝန်ပေးပြီး", ongoing: "ခရီးစဉ်ဆဲ", completed: "ပြီးဆုံး", cancelled: "ပယ်ဖျက်ပြီး" };
-  return map[status] || status;
-}
-
-// ============================================================
-// LIVE GPS TRACKING (Trip စတင်ချိန်မှ ပြီးဆုံးချိန်အထိ)
-// User Booking တင်ချိန်က လမ်းကြောင်း (route_geometry) အတိုင်းသာ ပြသမည်
-// — km/fare ကို ဒီနေရာမှာ ပြန်မတွက်ပါ
-// ============================================================
-let liveMap = null;
-let liveMarker = null;
-let liveWatchId = null;
-let liveActiveTripId = null;
-let lastLocationPushTime = 0;
-
-const LIVE_ROUTE_SOURCE_ID = "kt-live-route-source";
-const LIVE_ROUTE_LAYER_ID = "kt-live-route-layer";
-
-function makeLiveMarkerEl() {
-  const el = document.createElement("div");
-  el.style.width = "22px";
-  el.style.height = "22px";
-  el.style.borderRadius = "50%";
-  el.style.background = "#F5A623";
-  el.style.border = "3px solid #fff";
-  el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.5)";
-  return el;
-}
-
-function initLiveMap(centerLat, centerLng, routeGeometry) {
-  if (liveMap) { liveMap.remove(); liveMap = null; }
-
-  liveMap = new maplibregl.Map({
-    container: "liveMap",
-    style: "https://tiles.openfreemap.org/styles/dark",
-    center: [centerLng, centerLat],
-    zoom: 15,
-  });
-
-  liveMap.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
-
-  liveMarker = new maplibregl.Marker({ element: makeLiveMarkerEl() })
-    .setLngLat([centerLng, centerLat])
-    .addTo(liveMap);
-
-  liveMap.on("load", () => {
-    if (routeGeometry) {
-      drawLiveRoute(routeGeometry);
-      // User Booking လုပ်ချိန်က pickup→dropoff route တစ်ခုလုံးကို map ထဲ fit လုပ်
-      const coords = routeGeometry.coordinates;
-      if (coords && coords.length > 0) {
-        const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-        liveMap.fitBounds(bounds, { padding: 50, duration: 0 });
-      }
-    }
-  });
-}
-
-function drawLiveRoute(routeGeometry) {
-  const geojson = { type: "Feature", properties: {}, geometry: routeGeometry };
-  if (liveMap.getLayer(LIVE_ROUTE_LAYER_ID)) liveMap.removeLayer(LIVE_ROUTE_LAYER_ID);
-  if (liveMap.getSource(LIVE_ROUTE_SOURCE_ID)) liveMap.removeSource(LIVE_ROUTE_SOURCE_ID);
-
-  liveMap.addSource(LIVE_ROUTE_SOURCE_ID, { type: "geojson", data: geojson });
-  liveMap.addLayer({
-    id: LIVE_ROUTE_LAYER_ID,
-    type: "line",
-    source: LIVE_ROUTE_SOURCE_ID,
-    layout: { "line-join": "round", "line-cap": "round" },
-    paint: { "line-color": "#F5A623", "line-width": 4, "line-opacity": 0.85 },
-  });
-}
-
-async function startLiveTracking(tripId) {
-  if (!navigator.geolocation) {
-    showToast("ဒီ Browser က GPS ကို မထောက်ပံ့ပါ", "error");
-    return;
-  }
-
-  liveActiveTripId = tripId;
-  document.getElementById("liveSpeedValue").textContent = "0 km/h";
-  document.getElementById("liveTrackCard").classList.remove("kt-hidden");
-  document.getElementById("liveTrackCard").scrollIntoView({ behavior: "smooth", block: "center" });
-
-  // User Booking တင်ချိန်က route_geometry ကို trip record ထဲကနေ ဆွဲထုတ်
-  const { data: tripData } = await supabaseClient
-    .from("trips")
-    .select("route_geometry, pickup_lat, pickup_lng")
-    .eq("id", tripId)
-    .single();
-
-  const routeGeometry = tripData?.route_geometry || null;
-  const startLat = tripData?.pickup_lat || 16.8409;
-  const startLng = tripData?.pickup_lng || 96.1735;
-
-  initLiveMap(startLat, startLng, routeGeometry);
-
-  liveWatchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      const { latitude, longitude, speed } = pos.coords;
-
-      if (liveMap && liveMarker) {
-        liveMarker.setLngLat([longitude, latitude]);
-        liveMap.panTo([longitude, latitude]);
-      }
-
-      const speedKmh = speed ? Math.round(speed * 3.6) : 0;
-      document.getElementById("liveSpeedValue").textContent = speedKmh + " km/h";
-
-      // Supabase ထဲ trip ရဲ့ current GPS location ကို 5 စက္ကန့်တစ်ခါ update လုပ်
-      // (Passenger ဘက်ကနေ Live ကြည့်ချင်ရင် ဒီ column ကို subscribe လုပ်နိုင်)
-      const now = Date.now();
-      if (now - lastLocationPushTime > 5000) {
-        lastLocationPushTime = now;
-        supabaseClient.from("trips").update({
-          current_lat: latitude,
-          current_lng: longitude,
-        }).eq("id", tripId).then(() => {});
-      }
-    },
-    (err) => {
-      showToast("GPS တည်နေရာ ရယူ၍မရပါ — Location ခွင့်ပြုချက် စစ်ပါ", "error");
-    },
-    { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
-  );
-}
-
-function stopLiveTracking() {
-  if (liveWatchId !== null) {
-    navigator.geolocation.clearWatch(liveWatchId);
-    liveWatchId = null;
-  }
-  if (liveMap) { liveMap.remove(); liveMap = null; }
-  liveActiveTripId = null;
-  document.getElementById("liveTrackCard").classList.add("kt-hidden");
-}
-
-document.getElementById("liveFinishBtn").addEventListener("click", () => {
-  if (liveActiveTripId) finishTrip(liveActiveTripId);
-});
-
-// ---- Trip start/finish actions ----
-async function startTrip(tripId) {
-  // start_trip() DB function က status=ongoing လုပ်ပြီး Admin သတ်မှတ်ထားသော
-  // deduct_amount ကို driver wallet ထဲကနေ ချက်ချင်းနှုတ်ပေးမည်
-  const { error } = await supabaseClient.rpc("start_trip", { trip_id: tripId });
-  if (error) {
-    showToast("မအောင်မြင်ပါ - " + error.message, "error");
-    return;
-  }
-  showToast("ခရီးစဉ်စတင်ပါပြီ — Wallet မှ ဖြတ်ငွေနှုတ်ပြီးပါပြီ", "success");
-  loadTrips();
-  refreshWallet();
-  startLiveTracking(tripId);
-}
-
-async function finishTrip(tripId) {
-  // complete_trip() DB function က status ကိုသာ completed သို့ပြောင်းပေးမည်
-  // (ငွေဖြတ်ခြင်းက ခရီးစဉ်စတင်ချိန်ကတည်းက ပြီးသွားပြီ)
-  const { error } = await supabaseClient.rpc("complete_trip", { trip_id: tripId });
-  if (error) {
-    showToast("မအောင်မြင်ပါ - " + error.message, "error");
-    return;
-  }
-  stopLiveTracking();
-  showToast("ခရီးစဉ်ပြီးဆုံးပါပြီ", "success");
-  loadTrips();
-}
-
-// ---- Resume live tracking automatically if a trip is already ongoing on page load ----
-async function resumeLiveTrackingIfOngoing() {
-  const { data } = await supabaseClient
-    .from("trips")
-    .select("id")
-    .eq("driver_id", currentDriver.id)
-    .eq("status", "ongoing")
-    .limit(1)
-    .maybeSingle();
-
-  if (data) startLiveTracking(data.id);
-}
-
-// ---- Load top-up history ----
-async function loadTopups() {
-  const { data, error } = await supabaseClient
-    .from("topup_requests")
-    .select("*")
-    .eq("driver_id", currentDriver.id)
-    .order("requested_at", { ascending: false })
-    .limit(30);
-
-  const list = document.getElementById("topupsList");
-
-  if (error || !data || data.length === 0) {
-    list.innerHTML = `<div class="kt-empty"><div class="icon">💵</div>ငွေဖြည့်မှတ်တမ်း မရှိသေးပါ</div>`;
-    return;
-  }
-
-  list.innerHTML = data.map(r => `
-    <div class="kt-trip-item">
-      <div class="kt-trip-row">
-        <div class="kt-trip-route kt-mono">${formatMMK(r.amount)}</div>
-        <span class="kt-pill kt-pill-${r.status}">${topupStatusLabel(r.status)}</span>
-      </div>
-      <div class="kt-trip-meta">${new Date(r.requested_at).toLocaleString("my-MM")}</div>
-      ${r.note ? `<div class="kt-muted" style="font-size:12.5px; margin-top:4px;">${r.note}</div>` : ""}
-    </div>
-  `).join("");
-}
-
-function topupStatusLabel(status) {
-  const map = { pending: "စောင့်ဆိုင်းဆဲ", approved: "အတည်ပြုပြီး", rejected: "ငြင်းပယ်ပြီး" };
-  return map[status] || status;
-}
-</script>
-
 </body>
 </html>
