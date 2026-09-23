@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AURA DIAMOND — Mobile Legends Diamond Top-Up</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+Myanmar:wght@500;700&family=Noto+Sans+Myanmar:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --color-bg: #050414;
+  --color-bg-soft: #0a081f;
+  --color-surface: #120f2e;
+  --color-surface-alt: #1a1640;
+  --color-border: #3a2f7a;
+  --color-text: #F3F1FF;
+  --color-text-muted: #9C93CE;
+  --color-accent: #00F0FF;
+  --color-accent-strong: #00B8CC;
+  --color-gold: #FF2FD1;
+  --color-success: #39FF88;
+  --color-danger: #FF3B6B;
+  --font-display: 'Noto Serif Myanmar', serif;
+  --font-body: 'Noto Sans Myanmar', sans-serif;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+  --radius-input: 10px;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 90px; }
+body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; margin: 0; }
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+button { font-family: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+.container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+
+/* Header */
+.site-header { position: sticky; top: 0; z-index: 30; background: rgba(5, 4, 20, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,240,255,0.25); box-shadow: 0 2px 24px rgba(0,240,255,0.1); }
+.site-header .container { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 16px; }
+.brand { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; text-decoration: none; flex: none; text-shadow: 0 0 12px rgba(0,240,255,0.55); }
+.brand .gem { width: 20px; height: 20px; flex: none; filter: drop-shadow(0 0 6px rgba(0,240,255,0.8)); }
+.auth-area { display: flex; align-items: center; gap: 12px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
+.hamburger-btn { background: none; border: none; color: var(--color-text-muted); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0; flex: none; }
+.hamburger-btn svg { width: 22px; height: 22px; }
+.btn-login { background: linear-gradient(90deg, #00F0FF, #B84FFF); color: #0A0420; box-shadow: 0 0 18px rgba(184,79,255,0.5); }
+.btn-login:hover { box-shadow: 0 0 26px rgba(184,79,255,0.75); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 22px; border-radius: var(--radius-pill); border: 1px solid transparent; font-size: 15px; font-weight: 600; transition: transform .15s, background .15s, border-color .15s; text-decoration: none; white-space: nowrap; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--color-accent); color: #0A1420; box-shadow: 0 0 16px rgba(0,240,255,0.45); }
+.btn-primary:hover { background: var(--color-accent-strong); box-shadow: 0 0 24px rgba(0,240,255,0.7); }
+.btn-ghost { background: transparent; color: var(--color-text); border-color: var(--color-border); }
+.btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); box-shadow: 0 0 12px rgba(0,240,255,0.3); }
+.btn-google { background: #fff; color: #1f1f1f; }
+.btn-google:hover { background: #f2f2f2; }
+.btn-google svg { width: 18px; height: 18px; }
+.btn-danger { background: var(--color-danger); color: #fff; }
+.btn-success { background: var(--color-success); color: #06210f; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn-block { width: 100%; }
+
+.wallet-chip { display: flex; align-items: center; gap: 8px; background: var(--color-surface); border: 1px solid var(--color-border); padding: 8px 16px; border-radius: var(--radius-pill); font-size: 14px; }
+.wallet-chip .amt { color: var(--color-gold); font-weight: 700; }
+
+.user-chip { display: flex; align-items: center; gap: 10px; position: relative; }
+.user-chip img { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--color-border); }
+.user-chip .name { font-size: 14px; color: var(--color-text-muted); }
+.menu { position: absolute; top: 46px; right: 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; padding: 6px; min-width: 180px; display: none; flex-direction: column; box-shadow: 0 12px 30px rgba(0,0,0,.35); z-index: 40; }
+.menu.open { display: flex; }
+.menu a, .menu button { background: none; border: none; color: var(--color-text); text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+.menu a:hover, .menu button:hover { background: var(--color-surface-alt); }
+
+/* Hero */
+.hero { padding: 56px 0 48px; }
+.hero-inner { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
+.hero-eyebrow { color: var(--color-accent); font-weight: 600; font-size: 15px; margin-bottom: 14px; }
+.hero h1 { font-size: 40px; line-height: 1.25; max-width: 15ch; }
+.hero p { color: var(--color-text-muted); font-size: 17px; max-width: 46ch; margin: 20px 0 28px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.hero-art { display: flex; justify-content: center; }
+.hero-art svg { width: 100%; max-width: 300px; }
+
+/* Wallet card (shown after login) — styled after the reference app */
+.wallet-card-v2 { background: var(--color-surface); border: 1px solid rgba(0,240,255,0.3); border-radius: var(--radius-card); padding: 22px 22px 18px; margin-bottom: 14px; box-shadow: 0 0 26px rgba(0,240,255,0.12), inset 0 0 30px rgba(184,79,255,0.05); }
+.wallet-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.wallet-label-row { display: flex; align-items: center; gap: 8px; color: var(--color-text-muted); font-size: 14px; margin-bottom: 8px; }
+.wallet-label-row .flag { font-size: 16px; }
+.eye-toggle { background: none; border: none; color: var(--color-text-muted); font-size: 15px; padding: 0; }
+.wallet-balance-row { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--color-accent); letter-spacing: 1px; text-shadow: 0 0 14px rgba(0,240,255,0.5); }
+.wallet-balance-row .unit { font-size: 15px; color: var(--color-text-muted); font-family: var(--font-body); margin-left: 4px; text-shadow: none; }
+.wallet-topup-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: none; color: var(--color-accent); flex: none; }
+.wallet-topup-btn .icon-circle { width: 46px; height: 46px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 18px rgba(0,240,255,0.6); }
+.wallet-topup-btn .icon-circle svg { width: 22px; height: 22px; color: #0A1420; }
+.wallet-topup-btn span { font-size: 12px; color: var(--color-text-muted); }
+
+.history-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 40px; }
+.history-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 14px; font-size: 14px; color: var(--color-text); text-decoration: none; transition: box-shadow .2s, border-color .2s; }
+.history-btn:hover { border-color: var(--color-accent); box-shadow: 0 0 14px rgba(0,240,255,0.3); }
+.history-btn svg { width: 17px; height: 17px; color: var(--color-accent); flex: none; }
+
+/* Diamond package tiles (mimics the game-tile grid in the reference app) */
+.tile-card { position: relative; display: flex; align-items: center; gap: 14px; background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 16px; padding: 14px; overflow: hidden; text-align: left; width: 100%; transition: box-shadow .2s, border-color .2s; }
+.tile-card:hover { border-color: var(--color-accent); box-shadow: 0 0 18px rgba(0,240,255,0.3); }
+.tile-card.is-popular { border-color: var(--color-gold); box-shadow: 0 0 18px rgba(255,47,209,0.3); }
+.tile-icon { width: 54px; height: 54px; border-radius: 12px; background: linear-gradient(135deg, #B84FFF, #050414); display: flex; align-items: center; justify-content: center; flex: none; box-shadow: 0 0 14px rgba(184,79,255,0.5); }
+.tile-icon svg { width: 28px; height: 28px; }
+.tile-info { flex: 1; min-width: 0; padding-bottom: 18px; }
+.tile-name { font-weight: 700; font-size: 15px; }
+.tile-sub { color: var(--color-text-muted); font-size: 12px; margin-top: 2px; }
+.tile-price-badge { position: absolute; right: 0; bottom: 0; background: var(--color-gold); color: #2A0030; font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 12px 0 12px 0; box-shadow: 0 0 10px rgba(255,47,209,0.5); }
+
+/* Sections */
+.section-heading { margin-bottom: 28px; }
+.section-heading h2 { font-size: 28px; }
+.section-heading p { color: var(--color-text-muted); margin-top: 8px; }
+.packages { padding: 20px 0 64px; }
+.package-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+@media (min-width: 700px) { .package-grid { grid-template-columns: repeat(3, 1fr); } }
+.package-card { position: relative; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: 26px 22px; display: flex; flex-direction: column; gap: 6px; }
+.package-card.is-popular { border-color: var(--color-gold); background: linear-gradient(180deg, rgba(244,183,64,.08), var(--color-surface) 40%); }
+.package-card .badge { position: absolute; top: -12px; left: 22px; background: var(--color-gold); color: #2A0030; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: var(--radius-pill); }
+.package-diamonds { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+.package-diamonds svg { width: 22px; height: 22px; }
+.package-name { color: var(--color-text-muted); font-size: 14px; }
+.package-price { margin-top: 14px; font-size: 22px; font-weight: 700; color: var(--color-gold); }
+.package-card .btn { margin-top: 16px; }
+
+/* Lists (orders / deposits) */
+.list-section { padding: 20px 0 64px; }
+.list-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; align-items: center; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 14px; padding: 16px 20px; margin-bottom: 12px; font-size: 14px; }
+.list-row .row-date { color: var(--color-text-muted); }
+.status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 600; width: fit-content; }
+.status-pending { background: rgba(244,183,64,.15); color: var(--color-gold); }
+.status-confirmed { background: rgba(76,175,125,.15); color: var(--color-success); }
+.status-rejected { background: rgba(226,99,90,.15); color: var(--color-danger); }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--color-text-muted); border: 1px dashed var(--color-border); border-radius: 14px; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(6,10,20,.7); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+.modal { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px; padding: 30px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 22px; margin-bottom: 4px; }
+.modal .modal-sub { color: var(--color-text-muted); font-size: 14px; margin-bottom: 20px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 14px; margin-bottom: 6px; color: var(--color-text-muted); }
+.field input[type="text"], .field input[type="number"], .field select { width: 100%; padding: 12px 14px; border-radius: var(--radius-input); border: 1px solid var(--color-border); background: var(--color-bg-soft); color: var(--color-text); font-size: 15px; }
+.field input:focus, .field select:focus { outline: 2px solid var(--color-accent); outline-offset: 1px; }
+.payment-box { background: var(--color-bg-soft); border: 1px solid var(--color-border); border-radius: var(--radius-input); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.payment-box .num { font-weight: 700; letter-spacing: .5px; }
+.upload-card { border: 1.5px dashed var(--color-border); border-radius: var(--radius-card); padding: 16px; display: flex; align-items: center; gap: 14px; background: var(--color-bg-soft); flex-wrap: wrap; }
+.upload-card.has-file { border-color: var(--color-accent); border-style: solid; }
+.upload-preview { width: 48px; height: 48px; border-radius: 10px; background: var(--color-surface-alt); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; color: var(--color-text-muted); }
+.upload-preview svg { width: 24px; height: 24px; }
+.upload-preview img { width: 100%; height: 100%; object-fit: cover; }
+.upload-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+.upload-text span#deposit-file-text { font-size: 14px; color: var(--color-text); word-break: break-word; }
+.upload-hint { font-size: 12px; color: var(--color-text-muted); }
+.upload-card input[type="file"] { display: block; width: 100%; color: var(--color-text-muted); font-size: 13px; }
+.upload-card input[type="file"]::file-selector-button, .upload-card input[type="file"]::-webkit-file-upload-button { background: var(--color-accent); color: #0A1420; border: none; border-radius: var(--radius-pill); padding: 9px 16px; font-size: 13px; font-weight: 600; margin-right: 10px; cursor: pointer; }
+.modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+.modal-actions .btn { flex: 1; }
+.form-msg { font-size: 13px; margin-top: 10px; }
+.form-msg.error { color: var(--color-danger); }
+.form-msg.success { color: var(--color-success); }
+.balance-note { font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; padding: 10px 14px; background: var(--color-bg-soft); border-radius: var(--radius-input); }
+.balance-note.low { color: var(--color-danger); }
+
+/* Footer */
+.site-footer { border-top: 1px solid var(--color-border); padding: 28px 0; color: var(--color-text-muted); font-size: 13px; text-align: center; }
+
+/* Admin */
+.admin-tabs { display: flex; gap: 8px; padding: 24px 0 0; flex-wrap: wrap; }
+.admin-tab { background: none; border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 9px 18px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; }
+.admin-tab.active { background: var(--color-accent); color: #0A1420; border-color: var(--color-accent); }
+.admin-panel { padding: 24px 0 64px; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.filter-chip { background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-muted); padding: 7px 16px; border-radius: var(--radius-pill); font-size: 13px; }
+.filter-chip.active { border-color: var(--color-accent); color: var(--color-accent); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table th { text-align: left; color: var(--color-text-muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+.data-table td { padding: 12px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.data-table tr:last-child td { border-bottom: none; }
+.thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--color-border); cursor: zoom-in; }
+.table-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 6px 18px; overflow-x: auto; }
+.inline-input { width: 100%; background: var(--color-bg-soft); border: 1px solid var(--color-border); color: var(--color-text); padding: 7px 10px; border-radius: 8px; font-size: 13px; }
+.toggle { width: 40px; height: 22px; border-radius: 999px; background: var(--color-border); position: relative; border: none; cursor: pointer; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.toggle.on { background: var(--color-accent); }
+.toggle.on::after { transform: translateX(18px); }
+.add-package-form { display: grid; grid-template-columns: repeat(5, 1fr) auto; gap: 10px; margin-bottom: 20px; align-items: end; }
+.add-package-form .field { margin-bottom: 0; }
+.lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+.access-denied { min-height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px; padding: 40px 20px; }
+
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; text-align: center; padding-top: 10px; }
+  .hero p { margin-left: auto; margin-right: auto; }
+  .hero-actions { justify-content: center; }
+  .hero-art { order: -1; }
+  .package-grid { grid-template-columns: repeat(2, 1fr); }
+  .list-row { grid-template-columns: 1fr 1fr; row-gap: 8px; }
+  .add-package-form { grid-template-columns: 1fr 1fr; }
+  .wallet-card { justify-content: center; text-align: center; }
+}
+@media (max-width: 560px) {
+  .package-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 30px; }
+  .user-chip .name { display: none; }
+  .wallet-chip { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-left">
+      <button class="hamburger-btn" aria-label="menu" type="button">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <a href="#" class="brand" id="brand-link">
+        <svg class="gem" viewBox="0 0 24 24" fill="none"><path d="M3 9L12 2L21 9L12 22L3 9Z" fill="#00F0FF"/><path d="M3 9H21L12 22L3 9Z" fill="#B84FFF"/></svg>
+        AURA DIAMOND
+      </a>
+    </div>
+    <div class="auth-area" id="auth-area"></div>
+  </div>
+</header>
+
+<!-- ================= STORE VIEW ================= -->
+<div id="store-view">
+  <section class="container" id="wallet-section-wrap" style="padding-top:20px;"></section>
+
+  <section class="packages" id="packages">
+    <div class="container">
+      <div class="section-heading"><h2>Diamond အထုပ်များ</h2></div>
+      <div class="package-grid" id="package-grid"></div>
+    </div>
+  </section>
+
+  <section class="list-section" id="orders-history">
+    <div class="container">
+      <div class="section-heading"><h2>အော်ဒါမှတ်တမ်း</h2></div>
+      <div id="orders-list"><div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
+    </div>
+  </section>
+
+  <section class="list-section" id="deposits-history">
+    <div class="container">
+      <div class="section-heading"><h2>ငွေဖြည့်မှတ်တမ်း</h2></div>
+      <div id="deposits-list"><div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div></div>
+    </div>
+  </section>
+
+  <footer class="site-footer"><div class="container">© 2026 AURA DIAMOND — Independent top-up service, not affiliated with Moonton.</div></footer>
+</div>
+
+<!-- ================= ADMIN VIEW ================= -->
+<div id="admin-view" class="hidden">
+  <div class="container access-denied hidden" id="denied-gate">
+    <h2>ဝင်ခွင့်မရှိပါ</h2>
+    <p style="color:var(--color-text-muted)">Admin dashboard သည် Admin များအတွက်သာ ဖြစ်ပါသည်။</p>
+    <button class="btn btn-ghost" id="back-to-store-btn">စတိုးဆိုင်သို့ ပြန်သွားရန်</button>
+  </div>
+
+  <div id="admin-content" class="hidden">
+    <div class="container">
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="deposits">ငွေဖြည့်တောင်းဆိုမှုများ</button>
+        <button class="admin-tab" data-tab="orders">Diamond Order များ</button>
+        <button class="admin-tab" data-tab="packages">Diamond အထုပ်များ</button>
+      </div>
+    </div>
+
+    <div class="admin-panel container" id="panel-deposits">
+      <div class="filter-bar">
+        <button class="filter-chip active" data-status="pending" data-scope="deposits">စောင့်ဆိုင်းဆဲ</button>
+        <button class="filter-chip" data-status="all" data-scope="deposits">အားလုံး</button>
+        <button class="filter-chip" data-status="confirmed" data-scope="deposits">အတည်ပြုပြီး</button>
+        <button class="filter-chip" data-status="rejected" data-scope="deposits">ငြင်းပယ်ထား</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>ဖောက်သည်</th><th>ပမာဏ</th><th>နည်းလမ်း</th><th>Screenshot</th><th>အချိန်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
+          <tbody id="deposits-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-panel container hidden" id="panel-orders">
+      <div class="filter-bar">
+        <button class="filter-chip active" data-status="pending" data-scope="orders">စောင့်ဆိုင်းဆဲ</button>
+        <button class="filter-chip" data-status="all" data-scope="orders">အားလုံး</button>
+        <button class="filter-chip" data-status="confirmed" data-scope="orders">ပေးပြီး</button>
+        <button class="filter-chip" data-status="rejected" data-scope="orders">ငြင်းပယ်ထား</button>
+      </div>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>ဝယ်သူ</th><th>အထုပ်</th><th>Game ID</th><th>အချိန်</th><th>အခြေအနေ</th><th>လုပ်ဆောင်ရန်</th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="admin-panel container hidden" id="panel-packages">
+      <form class="add-package-form" id="add-package-form">
+        <div class="field"><label>အမည်</label><input class="inline-input" type="text" id="new-name" required></div>
+        <div class="field"><label>Diamond</label><input class="inline-input" type="number" id="new-diamonds" required></div>
+        <div class="field"><label>ဈေးနှုန်း (Ks)</label><input class="inline-input" type="number" id="new-price" required></div>
+        <div class="field"><label>အစီအစဉ်</label><input class="inline-input" type="number" id="new-sort" value="0"></div>
+        <div class="field"><label>&nbsp;</label></div>
+        <button type="submit" class="btn btn-primary btn-sm">အထုပ်အသစ်ထည့်မည်</button>
+      </form>
+      <div class="table-card">
+        <table class="data-table">
+          <thead><tr><th>အမည်</th><th>Diamond</th><th>ဈေးနှုန်း</th><th>Active</th><th>Popular</th><th></th></tr></thead>
+          <tbody id="packages-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Deposit (Top-up) Modal -->
+<div class="modal-backdrop hidden" id="deposit-modal">
+  <div class="modal">
+    <h3>Wallet ငွေဖြည့်ရန်</h3>
+    <div class="modal-sub">ငွေဖြည့်ပြီး Admin confirm လုပ်ပေးတာနဲ့ Wallet ထဲ ငွေဝင်ပါမယ်</div>
+    <form id="deposit-form">
+      <div class="field">
+        <label for="deposit-amount">ဖြည့်မည့် ပမာဏ (Ks)</label>
+        <input type="number" id="deposit-amount" min="500" step="1" required placeholder="ဥပမာ - 10000">
+      </div>
+      <div class="field">
+        <label>ငွေချေမှုနည်းလမ်း</label>
+        <select id="deposit-method"><option value="kbzpay">KBZPay</option><option value="wavepay">WavePay</option></select>
+      </div>
+      <div class="payment-box"><span>ငွေလွှဲရန် နံပါတ်</span><span class="num" id="deposit-payment-number"></span></div>
+      <div class="field">
+        <label>ငွေလွှဲပြီး Screenshot တင်ပါ</label>
+        <div class="upload-card" id="deposit-file-label">
+          <div class="upload-preview" id="deposit-preview-wrap">
+            <svg viewBox="0 0 24 24" fill="none" id="deposit-preview-icon"><path d="M4 16l4.5-6 3 4 2.5-3L20 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="9" r="1.3" fill="currentColor"/></svg>
+            <img id="deposit-preview-img" class="hidden" alt="preview">
+          </div>
+          <div class="upload-text">
+            <span id="deposit-file-text">ရွေးထားတဲ့ ဓာတ်ပုံ မရှိသေးပါ</span>
+            <span class="upload-hint">အောက်က ခလုတ်ကို နှိပ်ပြီး ဓာတ်ပုံရွေးပါ</span>
+          </div>
+          <input type="file" id="deposit-screenshot" accept="image/*" required>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="deposit-cancel">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn btn-primary" id="deposit-submit">ငွေဖြည့်တောင်းဆိုမည်</button>
+      </div>
+      <div class="form-msg" id="deposit-form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Order (Buy diamond) Modal -->
+<div class="modal-backdrop hidden" id="order-modal">
+  <div class="modal">
+    <h3 id="modal-package-name">Diamond ဝယ်ယူရန်</h3>
+    <div class="modal-sub" id="modal-package-price"></div>
+    <div class="balance-note" id="modal-balance-note"></div>
+    <form id="order-form">
+      <div class="field"><label for="game-id">Game ID</label><input type="text" id="game-id" required placeholder="ဥပမာ - 123456789"></div>
+      <div class="field"><label for="zone-id">Zone ID</label><input type="text" id="zone-id" placeholder="ဥပမာ - 2001"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modal-cancel">မလုပ်တော့ပါ</button>
+        <button type="submit" class="btn btn-primary" id="modal-submit">Wallet ထဲကနေ ဝယ်မည်</button>
+      </div>
+      <div class="form-msg" id="form-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop hidden" id="lightbox"><img id="lightbox-img" src="" alt="screenshot"></div>
+
+<script>
+/* =========================================================
+   EDIT ME — Supabase project + payment numbers
+   ========================================================= */
+const APP_CONFIG = {
+  SUPABASE_URL: "https://YOUR-PROJECT-REF.supabase.co",
+  SUPABASE_ANON_KEY: "YOUR-SUPABASE-ANON-KEY",
+  PAYMENT_NUMBERS: {
+    kbzpay: { label: "KBZPay", number: "09xxxxxxxxx", name: "Your Name" },
+    wavepay: { label: "WavePay", number: "09xxxxxxxxx", name: "Your Name" }
+  }
+};
+
+const { createClient } = supabase;
+const sb = createClient(APP_CONFIG.SUPABASE_URL, APP_CONFIG.SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let selectedPackage = null;
+let packagesCache = [];
+let ordersCacheAdmin = [];
+let depositsCacheAdmin = [];
+let activeOrderFilter = "pending";
+let activeDepositFilter = "pending";
+let view = "store";
+let balanceHidden = true;
+
+const authArea = document.getElementById("auth-area");
+
+function formatMMK(n) { return Number(n).toLocaleString("en-US") + " Ks"; }
+function statusLabel(s) { return s === "pending" ? "စောင့်ဆိုင်းဆဲ" : s === "confirmed" ? "အတည်ပြုပြီး" : s === "rejected" ? "ငြင်းပယ်ခံရသည်" : s; }
+function diamondIcon() { return `<svg viewBox="0 0 24 24" fill="none"><path d="M3 9L12 2L21 9L12 22L3 9Z" fill="#00F0FF"/><path d="M3 9H21L12 22L3 9Z" fill="#B84FFF"/></svg>`; }
+
+async function signInWithGoogle() {
+  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin + window.location.pathname } });
+  if (error) alert("Sign-in အမှား - " + error.message);
+}
+async function signOut() { await sb.auth.signOut(); location.reload(); }
+
+async function getCurrentProfile() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return { user: null, profile: null };
+  const { data: profile, error } = await sb.from("profiles").select("*").eq("id", user.id).single();
+  if (error) console.error("profile fetch error:", error);
+  return { user, profile: profile || null };
+}
+
+async function refreshProfile() {
+  const r = await getCurrentProfile();
+  currentUser = r.user;
+  currentProfile = r.profile;
+  renderAuthArea();
+  renderWalletCard();
+}
+
+/* ---------------- Header: auth + wallet chip ---------------- */
+function renderAuthArea() {
+  if (!currentUser) {
+    authArea.innerHTML = `
+      <button class="btn btn-login" id="google-btn">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M13 5L20 12L13 19M20 12H4" stroke="#0A0420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        အကောင့်ဝင်ရန်?
+      </button>`;
+    document.getElementById("google-btn").onclick = signInWithGoogle;
+    return;
+  }
+  const name = currentUser.user_metadata?.full_name || currentUser.email;
+  const avatar = currentUser.user_metadata?.avatar_url || "";
+  const isAdmin = currentProfile?.role === "admin";
+  authArea.innerHTML = `
+    <div class="user-chip">
+      ${avatar ? `<img src="${avatar}" alt="">` : ""}
+      <span class="name">${name}</span>
+      <button class="btn btn-ghost btn-sm" id="menu-toggle">▾</button>
+      <div class="menu" id="user-menu">
+        <a href="#orders-history" id="menu-history">မှတ်တမ်းများ</a>
+        ${isAdmin ? `<button id="menu-admin">Admin dashboard</button>` : ""}
+        <button id="logout-btn">ထွက်မည်</button>
+      </div>
+    </div>`;
+  document.getElementById("menu-toggle").onclick = () => document.getElementById("user-menu").classList.toggle("open");
+  document.getElementById("logout-btn").onclick = signOut;
+  document.getElementById("menu-history").onclick = () => setView("store");
+  if (isAdmin) document.getElementById("menu-admin").onclick = () => setView("admin");
+}
+
+function renderWalletCard() {
+  const wrap = document.getElementById("wallet-section-wrap");
+  if (!currentUser) { wrap.innerHTML = ""; return; }
+  const balance = currentProfile?.wallet_balance ?? 0;
+  const displayBalance = balanceHidden ? "******" : Number(balance).toLocaleString("en-US");
+  wrap.innerHTML = `
+    <div class="wallet-card-v2">
+      <div class="wallet-top">
+        <div>
+          <div class="wallet-label-row">
+            <span class="flag">🇲🇲</span>
+            <span>သင့်ပိုက်ဆံအိတ်</span>
+            <button class="eye-toggle" id="eye-toggle" type="button">${balanceHidden ? "🙈" : "👁"}</button>
+          </div>
+          <div class="wallet-balance-row">${displayBalance}<span class="unit">Ks</span></div>
+        </div>
+        <button class="wallet-topup-btn" id="topup-btn" type="button">
+          <span class="icon-circle">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 9H21" stroke="currentColor" stroke-width="2"/></svg>
+          </span>
+          <span>ငွေဖြည့်ရန်</span>
+        </button>
+      </div>
+    </div>
+    <div class="history-actions">
+      <a href="#orders-history" class="history-btn">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7V12L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        အော်ဒါမှတ်တမ်း
+      </a>
+      <a href="#deposits-history" class="history-btn">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7V12L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        ငွေဖြည့်မှတ်တမ်း
+      </a>
+    </div>`;
+  document.getElementById("topup-btn").onclick = openDepositModal;
+  document.getElementById("eye-toggle").onclick = () => { balanceHidden = !balanceHidden; renderWalletCard(); };
+}
+
+function setView(next) {
+  view = next;
+  document.getElementById("store-view").classList.toggle("hidden", view !== "store");
+  document.getElementById("admin-view").classList.toggle("hidden", view !== "admin");
+  if (view === "admin") enterAdmin();
+  window.scrollTo({ top: 0 });
+}
+document.getElementById("brand-link").onclick = (e) => { e.preventDefault(); setView("store"); };
+document.getElementById("back-to-store-btn").onclick = () => setView("store");
+
+/* ---------------- STORE: packages ---------------- */
+async function loadPackages() {
+  const { data, error } = await sb.from("diamond_packages").select("*").eq("is_active", true).order("sort_order", { ascending: true });
+  if (error) { console.error(error); return; }
+  renderPackages(data || []);
+}
+function renderPackages(packages) {
+  packagesCache = packages;
+  const grid = document.getElementById("package-grid");
+  if (!packages.length) { grid.innerHTML = `<div class="empty-state">လောလောဆယ် ရောင်းရန်အထုပ် မရှိသေးပါ</div>`; return; }
+  grid.innerHTML = packages.map(p => `
+    <button class="tile-card ${p.is_popular ? "is-popular" : ""}" data-id="${p.id}" type="button">
+      <span class="tile-icon">${diamondIcon()}</span>
+      <span class="tile-info">
+        <span class="tile-name">${p.name}</span>
+        <span class="tile-sub">${p.diamond_amount} 💎</span>
+      </span>
+      <span class="tile-price-badge">${formatMMK(p.price_mmk)}</span>
+    </button>`).join("");
+  grid.querySelectorAll("button[data-id]").forEach(btn => btn.onclick = () => openOrderModal(btn.dataset.id));
+}
+
+/* ---------------- Deposit (top-up) modal ---------------- */
+const depositModal = document.getElementById("deposit-modal");
+const depositForm = document.getElementById("deposit-form");
+const depositMsg = document.getElementById("deposit-form-msg");
+
+function openDepositModal() {
+  if (!currentUser) { alert("Wallet ငွေဖြည့်ရန် Google account ဖြင့် အရင်လော့ဂ်အင်ဝင်ပါ"); signInWithGoogle(); return; }
+  depositForm.reset();
+  updateDepositPaymentBox();
+  document.getElementById("deposit-file-text").textContent = "ရွေးထားတဲ့ ဓာတ်ပုံ မရှိသေးပါ";
+  document.getElementById("deposit-file-label").classList.remove("has-file");
+  document.getElementById("deposit-preview-img").classList.add("hidden");
+  document.getElementById("deposit-preview-icon").classList.remove("hidden");
+  depositMsg.textContent = "";
+  depositModal.classList.remove("hidden");
+}
+function updateDepositPaymentBox() {
+  const method = document.getElementById("deposit-method").value;
+  const info = APP_CONFIG.PAYMENT_NUMBERS[method];
+  document.getElementById("deposit-payment-number").textContent = `${info.number} (${info.name})`;
+}
+document.getElementById("deposit-method").addEventListener("change", updateDepositPaymentBox);
+document.getElementById("deposit-cancel").onclick = () => depositModal.classList.add("hidden");
+document.getElementById("deposit-screenshot").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    document.getElementById("deposit-file-text").textContent = file.name;
+    document.getElementById("deposit-file-label").classList.add("has-file");
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = document.getElementById("deposit-preview-img");
+      img.src = ev.target.result;
+      img.classList.remove("hidden");
+      document.getElementById("deposit-preview-icon").classList.add("hidden");
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+depositForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("deposit-submit");
+  submitBtn.disabled = true;
+  depositMsg.textContent = ""; depositMsg.className = "form-msg";
+  try {
+    const file = document.getElementById("deposit-screenshot").files[0];
+    if (!file) throw new Error("Screenshot ရွေးပေးပါ");
+    const amount = Number(document.getElementById("deposit-amount").value);
+    if (!amount || amount <= 0) throw new Error("ပမာဏ မှန်ကန်အောင် ထည့်ပါ");
+
+    const path = `${currentUser.id}/deposit-${Date.now()}-${file.name}`;
+    const { error: uploadError } = await sb.storage.from("payment-screenshots").upload(path, file);
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = sb.storage.from("payment-screenshots").getPublicUrl(path);
+
+    const { error: insertError } = await sb.from("deposits").insert({
+      user_id: currentUser.id,
+      amount: amount,
+      payment_method: document.getElementById("deposit-method").value,
+      screenshot_url: publicUrlData.publicUrl,
+      status: "pending"
+    });
+    if (insertError) throw insertError;
+
+    depositMsg.textContent = "ငွေဖြည့်တောင်းဆိုမှု တင်ပြီးပါပြီ! Admin confirm လုပ်ပြီးရင် Wallet ထဲ ငွေဝင်ပါမယ်။";
+    depositMsg.classList.add("success");
+    await loadMyDeposits();
+    setTimeout(() => depositModal.classList.add("hidden"), 1600);
+  } catch (err) {
+    depositMsg.textContent = err.message || "အမှားတစ်ခုဖြစ်သွားပါသည်";
+    depositMsg.classList.add("error");
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadMyDeposits() {
+  const el = document.getElementById("deposits-list");
+  if (!currentUser) { el.innerHTML = `<div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
+  const { data, error } = await sb.from("deposits").select("*").eq("user_id", currentUser.id).order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  if (!data || !data.length) { el.innerHTML = `<div class="empty-state">ငွေဖြည့်မှတ်တမ်း မရှိသေးပါ</div>`; return; }
+  el.innerHTML = data.map(d => `
+    <div class="list-row">
+      <div><div>${formatMMK(d.amount)} ဖြည့်ခဲ့သည်</div><div class="row-date">${new Date(d.created_at).toLocaleString("my-MM")}</div></div>
+      <div>${d.payment_method}</div>
+      <div>${d.admin_note ? d.admin_note : ""}</div>
+      <div><span class="status-pill status-${d.status}">${statusLabel(d.status)}</span></div>
+    </div>`).join("");
+}
+
+/* ---------------- Order (buy diamond via wallet) modal ---------------- */
+const modal = document.getElementById("order-modal");
+const orderForm = document.getElementById("order-form");
+const formMsg = document.getElementById("form-msg");
+
+function openOrderModal(packageId) {
+  if (!currentUser) { alert("အော်ဒါတင်ရန် Google account ဖြင့် အရင်လော့ဂ်အင်ဝင်ပါ"); signInWithGoogle(); return; }
+  selectedPackage = packagesCache.find(p => p.id === packageId);
+  if (!selectedPackage) return;
+  document.getElementById("modal-package-name").textContent = `${selectedPackage.name} — ${selectedPackage.diamond_amount} Diamond`;
+  document.getElementById("modal-package-price").textContent = formatMMK(selectedPackage.price_mmk);
+
+  const balance = currentProfile?.wallet_balance ?? 0;
+  const note = document.getElementById("modal-balance-note");
+  if (balance < selectedPackage.price_mmk) {
+    note.className = "balance-note low";
+    note.innerHTML = `လက်ကျန်ငွေ ${formatMMK(balance)} ပဲ ရှိပါတယ် — ${formatMMK(selectedPackage.price_mmk - balance)} ထပ်ဖြည့်ပါ။ <a href="#" id="note-topup-link" style="color:var(--color-accent);text-decoration:underline">ငွေဖြည့်ရန်</a>`;
+    document.getElementById("modal-submit").disabled = true;
+  } else {
+    note.className = "balance-note";
+    note.textContent = `လက်ကျန်ငွေ: ${formatMMK(balance)}`;
+    document.getElementById("modal-submit").disabled = false;
+  }
+
+  orderForm.reset();
+  formMsg.textContent = "";
+  modal.classList.remove("hidden");
+
+  const topupLink = document.getElementById("note-topup-link");
+  if (topupLink) topupLink.onclick = (e) => { e.preventDefault(); modal.classList.add("hidden"); openDepositModal(); };
+}
+document.getElementById("modal-cancel").onclick = () => modal.classList.add("hidden");
+
+orderForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById("modal-submit");
+  submitBtn.disabled = true;
+  formMsg.textContent = ""; formMsg.className = "form-msg";
+  try {
+    const { error } = await sb.rpc("place_order", {
+      p_package_id: selectedPackage.id,
+      p_game_user_id: document.getElementById("game-id").value.trim(),
+      p_game_zone_id: document.getElementById("zone-id").value.trim()
+    });
+    if (error) {
+      if (error.message && error.message.includes("INSUFFICIENT_BALANCE")) {
+        throw new Error("လက်ကျန်ငွေ မလုံလောက်ပါ — Wallet ထဲ ငွေထပ်ဖြည့်ပါ");
+      }
+      throw error;
+    }
+    formMsg.textContent = "ဝယ်ယူမှု အောင်မြင်ပါသည်! ခဏအတွင်း Diamond ထည့်ပေးပါမယ်။";
+    formMsg.classList.add("success");
+    await refreshProfile();
+    await loadMyOrders();
+    setTimeout(() => modal.classList.add("hidden"), 1400);
+  } catch (err) {
+    formMsg.textContent = err.message || "အမှားတစ်ခုဖြစ်သွားပါသည်";
+    formMsg.classList.add("error");
+    submitBtn.disabled = false;
+  }
+});
+
+async function loadMyOrders() {
+  const ordersList = document.getElementById("orders-list");
+  if (!currentUser) { ordersList.innerHTML = `<div class="empty-state">Google account ဖြင့် လော့ဂ်အင်ဝင်ပါ</div>`; return; }
+  const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk)").eq("user_id", currentUser.id).order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  if (!data || !data.length) { ordersList.innerHTML = `<div class="empty-state">အော်ဒါများ မရှိသေးပါ</div>`; return; }
+  ordersList.innerHTML = data.map(o => `
+    <div class="list-row">
+      <div><div>${o.diamond_packages?.name || ""} — ${o.diamond_packages?.diamond_amount || ""} Diamond</div><div class="row-date">${new Date(o.created_at).toLocaleString("my-MM")}</div></div>
+      <div>${formatMMK(o.diamond_packages?.price_mmk || 0)}</div>
+      <div>Game ID: ${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</div>
+      <div><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></div>
+    </div>`).join("");
+}
+
+/* ---------------- ADMIN ---------------- */
+async function enterAdmin() {
+  document.getElementById("denied-gate").classList.add("hidden");
+  document.getElementById("admin-content").classList.add("hidden");
+  if (!currentUser || currentProfile?.role !== "admin") { document.getElementById("denied-gate").classList.remove("hidden"); return; }
+  document.getElementById("admin-content").classList.remove("hidden");
+  await loadAdminDeposits();
+  await loadAdminOrders();
+  await loadAdminPackages();
+}
+
+/* --- admin: deposits --- */
+async function loadAdminDeposits() {
+  const { data, error } = await sb.from("deposits").select("*, profiles(email, full_name)").order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  depositsCacheAdmin = data || [];
+  renderAdminDeposits();
+}
+function renderAdminDeposits() {
+  const tbody = document.getElementById("deposits-tbody");
+  const rows = depositsCacheAdmin.filter(d => activeDepositFilter === "all" || d.status === activeDepositFilter);
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--color-text-muted);padding:24px">ငွေဖြည့်တောင်းဆိုမှု မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = rows.map(d => `
+    <tr data-id="${d.id}">
+      <td>${d.profiles?.full_name || d.profiles?.email || d.user_id.slice(0,8)}</td>
+      <td style="color:var(--color-gold);font-weight:700">${formatMMK(d.amount)}</td>
+      <td>${d.payment_method}</td>
+      <td>${d.screenshot_url ? `<img class="thumb" src="${d.screenshot_url}" data-full="${d.screenshot_url}">` : "—"}</td>
+      <td style="color:var(--color-text-muted)">${new Date(d.created_at).toLocaleString("my-MM")}</td>
+      <td><span class="status-pill status-${d.status}">${statusLabel(d.status)}</span></td>
+      <td>${d.status === "pending" ? `
+          <button class="btn btn-success btn-sm" data-action="confirm-deposit" data-id="${d.id}">အတည်ပြု</button>
+          <button class="btn btn-danger btn-sm" data-action="reject-deposit" data-id="${d.id}">ငြင်းပယ်</button>
+        ` : `<span style="color:var(--color-text-muted);font-size:12px">ပြီးစီးပြီး</span>`}</td>
+    </tr>`).join("");
+  tbody.querySelectorAll("img.thumb").forEach(img => img.onclick = () => { document.getElementById("lightbox-img").src = img.dataset.full; document.getElementById("lightbox").classList.remove("hidden"); });
+  tbody.querySelectorAll("button[data-action='confirm-deposit']").forEach(btn => btn.onclick = () => actOnDeposit(btn.dataset.id, "confirm"));
+  tbody.querySelectorAll("button[data-action='reject-deposit']").forEach(btn => btn.onclick = () => actOnDeposit(btn.dataset.id, "reject"));
+}
+async function actOnDeposit(id, action) {
+  const fn = action === "confirm" ? "confirm_deposit" : "reject_deposit";
+  const params = action === "confirm" ? { p_deposit_id: id } : { p_deposit_id: id, p_note: null };
+  const { error } = await sb.rpc(fn, params);
+  if (error) { alert(error.message); return; }
+  await loadAdminDeposits();
+}
+
+/* --- admin: orders --- */
+async function loadAdminOrders() {
+  const { data, error } = await sb.from("orders").select("*, diamond_packages(name, diamond_amount, price_mmk), profiles(email, full_name)").order("created_at", { ascending: false });
+  if (error) { console.error(error); return; }
+  ordersCacheAdmin = data || [];
+  renderAdminOrders();
+}
+function renderAdminOrders() {
+  const tbody = document.getElementById("orders-tbody");
+  const rows = ordersCacheAdmin.filter(o => activeOrderFilter === "all" || o.status === activeOrderFilter);
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:24px">Order မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = rows.map(o => `
+    <tr data-id="${o.id}">
+      <td>${o.profiles?.full_name || o.profiles?.email || o.user_id.slice(0,8)}</td>
+      <td>${o.diamond_packages?.name || ""} (${o.diamond_packages?.diamond_amount || 0} 💎)<br><span style="color:var(--color-gold)">${formatMMK(o.diamond_packages?.price_mmk || 0)}</span></td>
+      <td>${o.game_user_id}${o.game_zone_id ? " (" + o.game_zone_id + ")" : ""}</td>
+      <td style="color:var(--color-text-muted)">${new Date(o.created_at).toLocaleString("my-MM")}</td>
+      <td><span class="status-pill status-${o.status}">${statusLabel(o.status)}</span></td>
+      <td>${o.status === "pending" ? `
+          <button class="btn btn-success btn-sm" data-action="confirm-order" data-id="${o.id}">Diamond ပေးပြီ</button>
+          <button class="btn btn-danger btn-sm" data-action="reject-order" data-id="${o.id}">ငြင်းပယ် (ပြန်အမ်း)</button>
+        ` : `<span style="color:var(--color-text-muted);font-size:12px">ပြီးစီးပြီး</span>`}</td>
+    </tr>`).join("");
+  tbody.querySelectorAll("button[data-action='confirm-order']").forEach(btn => btn.onclick = () => actOnOrder(btn.dataset.id, "confirm"));
+  tbody.querySelectorAll("button[data-action='reject-order']").forEach(btn => btn.onclick = () => actOnOrder(btn.dataset.id, "reject"));
+}
+async function actOnOrder(id, action) {
+  const fn = action === "confirm" ? "confirm_order" : "reject_order";
+  const params = action === "confirm" ? { p_order_id: id } : { p_order_id: id, p_note: null };
+  const { error } = await sb.rpc(fn, params);
+  if (error) { alert(error.message); return; }
+  await loadAdminOrders();
+}
+
+document.getElementById("lightbox").onclick = () => document.getElementById("lightbox").classList.add("hidden");
+document.querySelectorAll(".filter-chip[data-scope='deposits']").forEach(chip => chip.onclick = () => {
+  document.querySelectorAll(".filter-chip[data-scope='deposits']").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeDepositFilter = chip.dataset.status;
+  renderAdminDeposits();
+});
+document.querySelectorAll(".filter-chip[data-scope='orders']").forEach(chip => chip.onclick = () => {
+  document.querySelectorAll(".filter-chip[data-scope='orders']").forEach(c => c.classList.remove("active"));
+  chip.classList.add("active");
+  activeOrderFilter = chip.dataset.status;
+  renderAdminOrders();
+});
+
+/* --- admin: packages --- */
+async function loadAdminPackages() {
+  const { data, error } = await sb.from("diamond_packages").select("*").order("sort_order", { ascending: true });
+  if (error) { console.error(error); return; }
+  renderAdminPackages(data || []);
+}
+function renderAdminPackages(packages) {
+  const tbody = document.getElementById("packages-tbody");
+  if (!packages.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--color-text-muted);padding:24px">အထုပ်မရှိသေးပါ</td></tr>`; return; }
+  tbody.innerHTML = packages.map(p => `
+    <tr data-id="${p.id}">
+      <td><input class="inline-input" data-field="name" value="${p.name}"></td>
+      <td><input class="inline-input" data-field="diamond_amount" type="number" value="${p.diamond_amount}" style="width:90px"></td>
+      <td><input class="inline-input" data-field="price_mmk" type="number" value="${p.price_mmk}" style="width:110px"></td>
+      <td><button class="toggle ${p.is_active ? "on" : ""}" data-field="is_active"></button></td>
+      <td><button class="toggle ${p.is_popular ? "on" : ""}" data-field="is_popular"></button></td>
+      <td><button class="btn btn-ghost btn-sm" data-action="save">သိမ်းမည်</button> <button class="btn btn-danger btn-sm" data-action="delete">ဖျက်မည်</button></td>
+    </tr>`).join("");
+  tbody.querySelectorAll("button.toggle").forEach(t => t.onclick = () => t.classList.toggle("on"));
+  tbody.querySelectorAll("button[data-action='save']").forEach(btn => btn.onclick = () => savePackageRow(btn.closest("tr")));
+  tbody.querySelectorAll("button[data-action='delete']").forEach(btn => btn.onclick = () => deletePackage(btn.closest("tr").dataset.id));
+}
+async function savePackageRow(row) {
+  const id = row.dataset.id;
+  const payload = {
+    name: row.querySelector("[data-field='name']").value.trim(),
+    diamond_amount: Number(row.querySelector("[data-field='diamond_amount']").value),
+    price_mmk: Number(row.querySelector("[data-field='price_mmk']").value),
+    is_active: row.querySelector("[data-field='is_active']").classList.contains("on"),
+    is_popular: row.querySelector("[data-field='is_popular']").classList.contains("on")
+  };
+  const { error } = await sb.from("diamond_packages").update(payload).eq("id", id);
+  if (error) { alert(error.message); return; }
+  await loadAdminPackages();
+}
+async function deletePackage(id) {
+  if (!confirm("ဤအထုပ်ကို ဖျက်မှာ သေချာပါသလား?")) return;
+  const { error } = await sb.from("diamond_packages").delete().eq("id", id);
+  if (error) { alert(error.message); return; }
+  await loadAdminPackages();
+}
+document.getElementById("add-package-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const payload = {
+    name: document.getElementById("new-name").value.trim(),
+    diamond_amount: Number(document.getElementById("new-diamonds").value),
+    price_mmk: Number(document.getElementById("new-price").value),
+    sort_order: Number(document.getElementById("new-sort").value) || 0
+  };
+  const { error } = await sb.from("diamond_packages").insert(payload);
+  if (error) { alert(error.message); return; }
+  e.target.reset();
+  await loadAdminPackages();
+});
+document.querySelectorAll(".admin-tab").forEach(tab => tab.onclick = () => {
+  document.querySelectorAll(".admin-tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  document.querySelectorAll(".admin-panel").forEach(p => p.classList.add("hidden"));
+  document.getElementById(`panel-${tab.dataset.tab}`).classList.remove("hidden");
+});
+
+/* ---------------- Init ---------------- */
+async function init() {
+  await refreshProfile();
+  await loadPackages();
+  await loadMyDeposits();
+  await loadMyOrders();
+
+  sb.auth.onAuthStateChange(async () => {
+    await refreshProfile();
+    await loadMyDeposits();
+    await loadMyOrders();
+    if (view === "admin") await enterAdmin();
+  });
+
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("user-menu");
+    if (menu && !e.target.closest(".user-chip")) menu.classList.remove("open");
+  });
+}
+init();
+</script>
+</body>
+</html>
